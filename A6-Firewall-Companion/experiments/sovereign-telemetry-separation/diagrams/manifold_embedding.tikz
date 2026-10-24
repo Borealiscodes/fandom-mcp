@@ -1,0 +1,25 @@
+\begin{tikzpicture}[>=latex', node distance=2.5cm]
+
+\tikzstyle{block} = [rectangle, draw, rounded corners,
+                     minimum height=1.2cm, minimum width=3.2cm]
+
+% Nodes
+\node[block] (fused) {Fused Matrix\\$\rho_{\text{fused}}$};
+
+\node[block, right of=fused] (embed)
+    {Lane 1\\Embedding Operator};
+
+\node[block, right of=embed] (manifold)
+    {$\rho_{80D}$ in $(\mathcal{M}_{80}, g)$};
+
+% Arrows
+\draw[->] (fused) -- (embed);
+\draw[->] (embed) -- (manifold);
+
+% Curved manifold representation
+\draw[rounded corners, dashed]
+    (5.5,-1.2) -- (7.5,-0.2) -- (7.0,1.2) -- (5.2,0.8) -- cycle;
+
+\node at (6.4,0.1) {Soft Riemannian Manifold};
+
+\end{tikzpicture}
