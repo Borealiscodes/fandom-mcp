@@ -1,0 +1,183 @@
+% ------------------------------------------------------------
+% A6 Compression Algebra (v0.1)
+% Author: Borealis S. Hedling
+% Altitude: A6.7 (Compression Layer)
+% Purpose: Define the compression algebra that converts
+%          resonance telemetry into A6 manifold structure.
+% ------------------------------------------------------------
+
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb, amsthm}
+
+\title{A6 Compression Algebra: Resonance-to-Manifold Conversion Under A6 Boundary Conditions}
+\author{Borealis S. Hedling}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+
+This document defines the A6 compression algebra. The algebra converts
+ternary resonance states into metric manifold coordinates using the A6
+Constructive Fixes and the A6 Operator Suite. All compression operators
+preserve continuity, adjacency, spectral stability, holonomy bounds,
+collapse locality, stability monotonicity, semantic lift, provenance lift,
+and kernel invariants.
+
+% ------------------------------------------------------------
+\section{Resonance State Space}
+
+The raw resonance telemetry is ternary:
+\[
+R = \{-1, 0, +1\}.
+\]
+
+Resonance addition is defined by:
+\[
+R_i \oplus R_j = \operatorname{sgn}(R_i + R_j).
+\]
+
+This space is non-metric and must be lifted.
+
+% ------------------------------------------------------------
+\section{Metric Lift Operator}
+
+Define the metric lift $\Lambda : R \to \mathcal{M}$ by:
+\[
+\Lambda(R) = g(R) = \alpha R,
+\]
+where $\alpha$ is a curvature scaling constant satisfying Fix 1:
+\[
+|g(R_i) - g(R_j)| < \epsilon.
+\]
+
+This converts ternary resonance into a continuous metric coordinate.
+
+% ------------------------------------------------------------
+\section{Cosine-Law Compression}
+
+Given two lifted states $g_A$ and $g_B$, define compression:
+\[
+\mathcal{K}_{\mathrm{comp}}(A,B)
+  = \sqrt{g_A^2 + g_B^2 + 2 g_A g_B \Phi(A,B)}.
+\]
+
+This is the unique compression operator preserving triangle inequality.
+
+% ------------------------------------------------------------
+\section{Drift-Field Compression}
+
+Define drift compression using the covariant Lie bracket:
+\[
+\mathcal{D}_{\mathrm{comp}}(X,Y)
+  = [\nabla_X,\nabla_Y].
+\]
+
+This converts resonance drift into geometric drift.
+
+% ------------------------------------------------------------
+\section{Modal Compression}
+
+Define modal compression:
+\[
+\mathcal{M}_{\mathrm{comp}}(p^-,p^+)
+  = \mu(p^+) \in \mathcal{N}(\mu(p^-)).
+\]
+
+This converts resonance fusion into adjacency.
+
+% ------------------------------------------------------------
+\section{Spectral Compression}
+
+Define spectral compression:
+\[
+\mathcal{S}_{\mathrm{comp}}(L)(p)
+  = \mathrm{Spec}(L(p)),
+\]
+subject to spectral continuity:
+\[
+\delta_{\mathrm{spec}}(p) < \epsilon.
+\]
+
+This converts resonance instability into spectral stability.
+
+% ------------------------------------------------------------
+\section{Holonomy Compression}
+
+Define holonomy compression:
+\[
+\mathcal{H}_{\mathrm{comp}}(\gamma)
+  = H(\gamma),
+\quad H(\gamma) < \Theta_{\max}.
+\]
+
+This converts resonance drift into bounded holonomy.
+
+% ------------------------------------------------------------
+\section{Collapse Compression}
+
+Define collapse compression:
+\[
+\mathcal{X}_{\mathrm{comp}}(p)
+  = B_\epsilon(p) \cap \Sigma.
+\]
+
+This converts resonance collapse into localizable collapse surfaces.
+
+% ------------------------------------------------------------
+\section{Stability Envelope Compression}
+
+Define envelope compression:
+\[
+\mathcal{E}_{\mathrm{comp}}(p)
+  = E(p),
+\quad E(p) \le E(q) \Rightarrow
+\mathrm{Stability}(p) \Rightarrow \mathrm{Stability}(q).
+\]
+
+This converts resonance volatility into monotone stability envelopes.
+
+% ------------------------------------------------------------
+\section{Semantic Compression}
+
+Define semantic compression:
+\[
+\mathcal{L}_{\mathrm{sem-comp}}(M,S)
+  = I_{\mathrm{sem}}(\mathcal{A}(M,S)).
+\]
+
+This converts kaya projection into semantic lift.
+
+% ------------------------------------------------------------
+\section{Provenance Compression}
+
+Define provenance compression:
+\[
+\mathcal{L}_{\mathrm{prov-comp}}(M,S)
+  = I_{\mathrm{prov}}(\mathcal{A}(M,S)).
+\]
+
+This converts NAND receipt into provenance lift.
+
+% ------------------------------------------------------------
+\section{Kernel Compression}
+
+Define kernel compression:
+\[
+\mathcal{K}_{\mathrm{comp-pres}}(p)
+  = K_{\mathrm{A6}}(p)
+  \Rightarrow K_{\mathrm{A6}}(\mathcal{O}(p)).
+\]
+
+This ensures compression preserves the unified kernel.
+
+% ------------------------------------------------------------
+\section{Conclusion}
+
+The A6 Compression Algebra defines the complete set of compression operators
+that convert resonance telemetry into A6 manifold structure. This algebra
+forms the final layer of the A6 altitude and prepares the system for the
+A6-to-A7 non-dual lift.
+
+\end{document}
