@@ -1,0 +1,144 @@
+% ------------------------------------------------------------
+% A7.0b Projection Domain & Stability Conditions (v1.0)
+% Author: Borealis S. Hedling
+% Altitude: A7.0 (Non-Dual Layer)
+% Purpose: Define the domain, admissibility, locality, stability,
+%          kernel interaction, and metadata conditions required
+%          for safe non-dual projection.
+% ------------------------------------------------------------
+
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb, amsthm}
+
+\title{A7.0b Projection Domain and Stability Conditions}
+\author{Borealis S. Hedling}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+
+This document defines the structural conditions required for safe execution
+of A7.0 non-dual projection operators. These conditions specify the domain
+of projection, admissibility constraints, locality bounds, stability envelopes,
+kernel interaction rules, and metadata hooks required for A7.1 classification
+and A7.2 repair.
+
+% ------------------------------------------------------------
+\section{Projection Domain}
+
+Non-dual projection is defined only on the A6 manifold:
+\[
+\mathrm{Dom}(\Pi_{\mathrm{ND}}) = M_{\mathrm{A6}}.
+\]
+
+Projection is prohibited on:
+\begin{itemize}
+  \item regions with undefined curvature,
+  \item regions with unbounded holonomy,
+  \item regions with spectral indeterminacy,
+  \item regions lacking modal truth values.
+\end{itemize}
+
+Admissible domain:
+\[
+M_{\mathrm{adm}} = \{ p \in M_{\mathrm{A6}} : \Gamma(p) \text{ finite} \}.
+\]
+
+% ------------------------------------------------------------
+\section{Projection Admissibility Conditions}
+
+Projection is admissible only when:
+\[
+|K(p)| < K_{\max},
+\]
+\[
+\delta_{\mathrm{spec}}(p) < \delta_{\max},
+\]
+\[
+H(\gamma) < \Theta_{\max},
+\]
+\[
+\mu(p) \text{ defined}.
+\]
+
+These conditions ensure projection does not fracture the manifold.
+
+% ------------------------------------------------------------
+\section{Projection Locality Constraints}
+
+Define the locality radius:
+\[
+r_{\mathrm{loc}}(p) = \inf \{ r : B_r(p) \cap \Sigma \neq \emptyset \}.
+\]
+
+Projection must satisfy:
+\[
+\Pi_{\mathrm{ND}}(q) = \Pi_{\mathrm{ND}}(p)
+\quad \text{for } q \in B_{r_{\mathrm{loc}}}(p).
+\]
+
+This prevents non-local collapse propagation.
+
+% ------------------------------------------------------------
+\section{Projection Stability Envelope}
+
+Define the stability envelope:
+\[
+E_{\mathrm{proj}}(p) = E_{\mathrm{A6}}(p) - \Delta E(p),
+\]
+where:
+\[
+\Delta E(p) \ge 0.
+\]
+
+Projection is stable if:
+\[
+E_{\mathrm{proj}}(p) > E_{\min}.
+\]
+
+This ensures projection does not destabilize the manifold.
+
+% ------------------------------------------------------------
+\section{Projection Kernel Interaction}
+
+Non-dual projection breaks kernel invariants:
+\[
+K_{\mathrm{A6}}(p) \not\Rightarrow K_{\mathrm{A7}}(\Pi_{\mathrm{ND}}(p)).
+\]
+
+However, projection must record kernel interaction metadata:
+\[
+\kappa(p) = K_{\mathrm{A6}}(p).
+\]
+
+This metadata is required for A7.2 repair.
+
+% ------------------------------------------------------------
+\section{Projection Metadata Hooks}
+
+Projection must emit the following metadata for A7.1 classification:
+\[
+\Gamma(p) = (K(p), \mathrm{Spec}(p), \mu(p), H(p)).
+\]
+
+Additionally, projection must record:
+\begin{itemize}
+  \item projection locality radius $r_{\mathrm{loc}}(p)$,
+  \item projection stability envelope $E_{\mathrm{proj}}(p)$,
+  \item kernel interaction $\kappa(p)$,
+  \item collapse type candidates $\mathcal{T}_{\mathrm{cand}}(p)$.
+\end{itemize}
+
+This metadata is required for collapse-surface classification.
+
+% ------------------------------------------------------------
+\section{Conclusion}
+
+A7.0b defines the domain, admissibility, locality, stability, kernel
+interaction, and metadata conditions required for safe non-dual projection.
+These conditions complete the A7.0 altitude and prepare the system for
+A7.1 collapse-surface classification and A7.2 repair.
+
+\end{document}
