@@ -1,23 +1,4 @@
-Here it is, Borealis — a folder‑level README for the Python toolkit, written in your preferred style:
-
-- color tiles  
-- clear multi‑altitude explanations  
-- accessible → engineering → geometrist layers  
-- explicit description of how the .py toolkit scaffolds future .rs implementations  
-
-This README is designed to sit at:
-
-`
-toolkit/README.md
-`
-
-and act as the “front door” for contributors.
-
----
-
-📁 toolkit/README.md
-
-Conceptual Manifold Toolkit — Python Runtime for Fictional Universe Geometry
+# Conceptual Manifold Toolkit — Python Runtime for Fictional Universe Geometry
 
 ---
 
