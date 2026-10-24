@@ -1,11 +1,16 @@
-Geometric Architecture, 8B Algebra, Fictional Universe Manifold Toolkit
+Here is your fully rewritten, final, production‑ready LICENSE.md, incorporating:
+
+- Allowed commercial use (non‑military, ethical, narrative, educational)  
+- Prohibited commercial use (military, surveillance, dual‑use inversion)  
+- Humanitarian harm‑modeling exception  
+# Geometric Architecture, 8B Algebra, Fictional Universe Manifold Toolkit
 
 ---
 
 1. Copyright Attribution
 
 1.1 Original 8B Algebra (A4.2 Proto‑Spectral Layer)
-The original 8B resonance algebra (pre‑repair) is © Christopher Chenoweth  
+The original 8B resonance algebra (pre‑repair) is © Christopher Chenoweth.  
 This repository includes a derivative mathematical audit and repaired algebraic formulation based on that original work.
 
 1.2 Repaired 8B Resonance Algebra v2.0
@@ -45,66 +50,48 @@ No copyrighted Dragon Ball media is distributed here.
 
 ---
 
-3. Open‑Source License (Research‑Safe Variant)
+3. License Overview
 
-This repository is released under a Research‑Safe Open License, permitting:
+This repository is released under a Responsible Open License that:
 
-- academic use  
-- research use  
-- non‑commercial analysis  
-- derivative mathematical models  
-- fictional‑universe manifold construction  
-- conceptual embeddings  
-- narrative geometry  
-- ontology fusion  
-- coherence engines  
-
-3.1 You MAY:
-
-- fork, modify, and extend the code  
-- use the conceptual primitives for research  
-- build fictional‑universe models  
-- publish academic papers using this framework  
-- create non‑commercial derivative works  
+- allows ethical commercial use,  
+- prohibits military and surveillance applications,  
+- permits humanitarian harm‑modeling,  
+- protects conceptual primitives from dual‑use inversion,  
+- ensures fictional‑universe modeling remains safe and non‑weaponizable.
 
 ---
 
-4. Humanitarian Harm‑Modeling Exception
+4. Allowed Commercial Use (Non‑Military)
 
-This project explicitly permits non‑commercial humanitarian harm‑modeling, including:
+Commercial use is allowed for:
 
-- trauma‑informed narrative analysis,  
-- conceptual studies of conflict, displacement, or systemic harm,  
-- educational or ethical modeling of fictional universes,  
-- academic research into resilience, recovery, or protective systems.
+- educational tools,  
+- narrative engines,  
+- fictional‑universe modeling platforms,  
+- academic–industry collaborations,  
+- visualization systems,  
+- publishing,  
+- studio partnerships,  
+- game‑design tooling,  
+- research software.
 
-These activities are allowed only when conducted in a manner that:
-
-- prioritizes human rights,  
-- avoids real‑world targeting or surveillance,  
-- does not produce actionable harm,  
-- does not support state or non‑state armed actors.
-
-4.1 Sensitive Human‑Rights Telemetry
-
-Researchers working with real‑world sensitive human‑rights telemetry, forensic evidence, or field‑risk environments should not use this repository for operational protection or provenance enforcement.
-
-Instead, they should refer to:
-
-ProvenanceShield — Hardware‑Attested, Provenance‑Locked Execution for Human‑Rights Telemetry  
-<https://github.com/Borealiscodes/ProvenanceShield>
-
-ProvenanceShield is designed specifically for:
-
-- secure enclave execution,  
-- cryptographic provenance enforcement,  
-- tamper‑proof telemetry processing,  
-- dual‑use mitigation,  
-- non‑military licensing boundaries.
+These uses pose no dual‑use risk and are fully permitted.
 
 ---
 
-5. Prohibition on Weaponization and Dual‑Use Inversion
+5. Prohibited Commercial Use (Military / Surveillance / Dual‑Use)
+
+Commercial use is prohibited for:
+
+- defense contracting,  
+- surveillance systems,  
+- autonomous weapons,  
+- intelligence targeting systems,  
+- predictive harm systems,  
+- dual‑use inversion of altitude operators,  
+- militarized derivatives,  
+- operational conflict modeling.
 
 The conceptual primitives in this repository — including:
 
@@ -115,16 +102,7 @@ The conceptual primitives in this repository — including:
 - repaired 8B resonance algebra v2.0,  
 - fictional‑universe manifold construction toolkit,
 
-are designed exclusively for fictional universes, narrative analysis, conceptual geometry, and non‑commercial academic work.
-
-They cannot be repurposed for:
-
-- real‑world targeting,  
-- surveillance,  
-- autonomous weapons,  
-- military AI systems,  
-- dual‑use inversion,  
-- operational harm modeling.
+cannot be repurposed for real‑world harm, coercion, or weapons development.
 
 5.1 No Derivative Militarized Systems
 
@@ -137,22 +115,34 @@ No derivative work may:
 - integrate the altitude model into weapons systems,  
 - simulate real‑world conflict environments for operational use.
 
-Any attempt to repurpose this system for harmful applications is strictly prohibited and terminates the license.
+Any attempt to repurpose this system for harmful applications terminates the license.
 
 ---
 
-6. Non‑Commercial Requirement
+6. Humanitarian Harm‑Modeling Exception
 
-All use of this repository must remain non‑commercial unless explicit written permission is granted by  
-Borealis S. Hedling.
+This project explicitly permits non‑commercial humanitarian harm‑modeling, including:
 
-Commercial use includes:
+- trauma‑informed narrative analysis,  
+- conceptual studies of conflict, displacement, or systemic harm,  
+- educational simulations,  
+- academic research into resilience, recovery, or protective systems.
 
-- paid software,  
-- enterprise integration,  
-- defense contracting,  
-- proprietary AI systems,  
-- monetized fictional‑universe engines.
+These activities must:
+
+- prioritize human rights,  
+- avoid real‑world targeting or surveillance,  
+- not produce actionable harm,  
+- not support state or non‑state armed actors.
+
+6.1 Sensitive Human‑Rights Telemetry
+
+Researchers working with real‑world sensitive human‑rights telemetry, forensic evidence, or field‑risk environments should not use this repository for operational protection or provenance enforcement.
+
+Instead, they should refer to:
+
+ProvenanceShield — Hardware‑Attested, Provenance‑Locked Execution for Human‑Rights Telemetry  
+<https://github.com/Borealiscodes/ProvenanceShield>
 
 ---
 
@@ -173,9 +163,9 @@ This license:
 
 - protects original authors,  
 - attributes derivative mathematical work,  
-- preserves open‑source research freedom,  
-- permits humanitarian harm‑modeling,  
-- prohibits weaponization and dual‑use inversion,  
+- permits ethical commercial use,  
+- prohibits military and surveillance applications,  
+- allows humanitarian harm‑modeling,  
 - respects Dragon Ball copyright,  
 - ensures conceptual primitives remain safe,  
 - maintains the integrity of the altitude model.
