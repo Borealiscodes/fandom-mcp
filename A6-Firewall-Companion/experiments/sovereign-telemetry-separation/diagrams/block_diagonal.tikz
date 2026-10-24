@@ -1,0 +1,18 @@
+\begin{tikzpicture}[>=latex']
+
+% Matrix blocks
+\node at (0,0) {$
+\rho_{\text{fused}} =
+\begin{pmatrix}
+\tilde{\rho}_{-1} & 0 & 0 \\
+0 & \tilde{\rho}_{0} & 0 \\
+0 & 0 & \tilde{\rho}_{+1}
+\end{pmatrix}
+$};
+
+% Labels
+\node at (-2.8, 1.2) {TRIT $-1$};
+\node at (0, 1.2) {TRIT $0$};
+\node at (2.8, 1.2) {TRIT $+1$};
+
+\end{tikzpicture}
