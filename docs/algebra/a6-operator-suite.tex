@@ -1,0 +1,198 @@
+% ------------------------------------------------------------
+% A6 Operator Suite (v0.1)
+% Author: Borealis S. Hedling
+% Altitude: A6.6 (Operator Layer)
+% Purpose: Define the operator families permitted under the
+%          A6 Constructive Fixes firewall.
+% ------------------------------------------------------------
+
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb, amsthm}
+
+\title{A6 Operator Suite: Dual-Algebra Operators Under A6 Boundary Conditions}
+\author{Borealis S. Hedling}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+
+This document defines the operator families permitted at A6 altitude.
+Each operator is derived from the corresponding A6 Constructive Fix and
+is guaranteed to preserve continuity, adjacency, spectral stability,
+holonomy bounds, collapse locality, stability monotonicity, semantic lift,
+provenance lift, and kernel preservation.
+
+% ------------------------------------------------------------
+\section{Curvature Operators}
+
+\subsection{Curvature Lift Operator}
+Given curvature field $K(p)$, define the lift:
+\[
+\mathcal{C}_{\mathrm{lift}}(K)(p) = K(p) + \delta K(p),
+\]
+subject to curvature continuity:
+\[
+|\delta K(p)| < \epsilon.
+\]
+
+\subsection{Curvature Combination Operator}
+Derived from the cosine-law:
+\[
+\mathcal{C}_{\mathrm{comb}}(K_A, K_B)
+  = \sqrt{K_A^2 + K_B^2 + 2 K_A K_B \Phi(A,B)}.
+\]
+
+% ------------------------------------------------------------
+\section{Drift Operators}
+
+\subsection{Drift-Field Lift}
+\[
+\mathcal{D}_{\mathrm{lift}}(X) = X + \delta X,
+\quad |\delta X| < \epsilon.
+\]
+
+\subsection{Covariant Drift Interaction}
+\[
+\mathcal{D}_{\mathrm{int}}(X,Y)
+  = [\nabla_X,\nabla_Y] - \nabla_{[X,Y]}.
+\]
+
+% ------------------------------------------------------------
+\section{Modal Operators}
+
+\subsection{Modal Adjacency Operator}
+\[
+\mathcal{M}_{\mathrm{adj}}(\mu(p^-)) = \mathcal{N}(\mu(p^-)).
+\]
+
+\subsection{Modal Transition Operator}
+\[
+\mathcal{M}_{\mathrm{trans}}(p^-,p^+) :
+\mu(p^+) \in \mathcal{N}(\mu(p^-)).
+\]
+
+% ------------------------------------------------------------
+\section{Spectral Operators}
+
+\subsection{Spectral Continuity Operator}
+\[
+\mathcal{S}_{\mathrm{cont}}(L)(p)
+  = \mathrm{Spec}(L(p)),
+\quad \text{continuous in } p.
+\]
+
+\subsection{Spectral Mismatch Bound Operator}
+\[
+\mathcal{S}_{\mathrm{bound}}(p)
+  = \delta_{\mathrm{spec}}(p),
+\quad \delta_{\mathrm{spec}}(p) < \epsilon.
+\]
+
+% ------------------------------------------------------------
+\section{Holonomy Operators}
+
+\subsection{Holonomy Drift Operator}
+\[
+\mathcal{H}_{\mathrm{drift}}(\gamma)
+  = H(\gamma) + \delta H(\gamma),
+\quad |\delta H| < \epsilon.
+\]
+
+\subsection{Holonomy Bound Operator}
+\[
+\mathcal{H}_{\mathrm{bound}}(\gamma)
+  = H(\gamma),
+\quad H(\gamma) < \Theta_{\max}.
+\]
+
+% ------------------------------------------------------------
+\section{Collapse Operators}
+
+\subsection{Collapse-Surface Detector}
+\[
+\mathcal{X}_{\mathrm{detect}}(p)
+  = \begin{cases}
+      1 & p \in \Sigma,\\
+      0 & p \notin \Sigma.
+    \end{cases}
+\]
+
+\subsection{Collapse Locality Operator}
+\[
+\mathcal{X}_{\mathrm{local}}(p)
+  = B_\epsilon(p) \cap \Sigma.
+\]
+
+% ------------------------------------------------------------
+\section{Stability Envelope Operators}
+
+\subsection{Envelope Lift Operator}
+\[
+\mathcal{E}_{\mathrm{lift}}(p)
+  = E(p) + \delta E(p),
+\quad \delta E(p) \ge 0.
+\]
+
+\subsection{Stability Monotonicity Operator}
+\[
+\mathcal{E}_{\mathrm{mono}}(p,q) :
+E(p) \le E(q) \Rightarrow
+\mathrm{Stability}(p) \Rightarrow \mathrm{Stability}(q).
+\]
+
+% ------------------------------------------------------------
+\section{Semantic Lift Operators}
+
+\subsection{Semantic Lift}
+\[
+\mathcal{L}_{\mathrm{sem}}(M,S)
+  = I_{\mathrm{sem}}(\mathcal{A}(M,S)).
+\]
+
+\subsection{Semantic Adjacency}
+\[
+\mathcal{L}_{\mathrm{adj}}(p,q) :
+\mu(p) \leadsto \mu(q).
+\]
+
+% ------------------------------------------------------------
+\section{Provenance Lift Operators}
+
+\subsection{Provenance Lift}
+\[
+\mathcal{L}_{\mathrm{prov}}(M,S)
+  = I_{\mathrm{prov}}(\mathcal{A}(M,S)).
+\]
+
+\subsection{Provenance Continuity}
+\[
+\mathcal{L}_{\mathrm{cont}}(p,q) :
+I_{\mathrm{prov}}(p) \Rightarrow I_{\mathrm{prov}}(q).
+\]
+
+% ------------------------------------------------------------
+\section{Kernel Operators}
+
+\subsection{Kernel Preservation}
+\[
+\mathcal{K}_{\mathrm{pres}}(p)
+  = K_{\mathrm{A6}}(p)
+  \Rightarrow K_{\mathrm{A6}}(\mathcal{O}(p)).
+\]
+
+\subsection{Operator Determinism}
+\[
+\mathcal{K}_{\mathrm{det}}(\mathcal{O}) :
+\mathcal{O}(p) = \mathcal{O}(q) \Rightarrow p = q.
+\]
+
+% ------------------------------------------------------------
+\section{Conclusion}
+
+The A6 Operator Suite defines the complete set of operators permitted under
+the A6 Constructive Fixes firewall. These operators form the foundation for
+the A6 Compression Algebra and the A6-to-A7 lift.
+
+\end{document}
