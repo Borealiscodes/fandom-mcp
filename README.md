@@ -1,96 +1,215 @@
-# 🐉 `8b-is/fandom-mcp` — Fandom Wiki Consumption MCP Server (`Dragon Ball Universe` Edition)
+# 🌌 fandom‑mcp
 
-Zero-dependency stdio **Model Context Protocol (MCP)** server & CLI for consuming Fandom / MediaWiki universes (`https://<wiki>.fandom.com/api.php`), **starting with the Dragon Ball Universe (`dragonball.fandom.com`)** and supporting any Fandom wiki subdomain (`onepiece`, `naruto`, `bleach`, `starwars`, `lotr`, `warhammer40k`, `cyberpunk`, `witcher`, etc.).
+Dragon Ball Universe Coherence Engine — Ontology, Clustering, and Multiversal Runtime Physics
 
----
+The fandom‑mcp project is an open‑source attempt to build a coherent, mathematically stable representation of the Dragon Ball Universe, including:
 
-## ⚡ 9 MCP Tools Exposed
+- characters  
+- transformations  
+- sagas  
+- timelines  
+- universes  
+- cosmology  
+- power scaling  
+- multiversal branching  
 
-| Tool | Description |
-|---|---|
-| **`fandom_dbz_scouter`** | **Dragon Ball Universe Scouter (`IT'S OVER 9,000!!`)** — Extracts a character/form/technique's structured `Character Infobox`, canonical quote, Japanese/Romaji names, race, family tree (`FamConnect`), mentors, students, Daizenshuu power-level milestones, `8b-is` Balanced Ternary resonance (`432 / 528 / 852 Hz`), and optional side-by-side `compare_with` rival analysis (e.g. `Goku` vs `Vegeta`). |
-| **`fandom_sovereign_ontology`** | **8b-is Sovereign Library & Ontology Engine (`{-1, 0, +1}` · `NAND(HELD, READ) = 0`)** — Aligns any character, form, artifact, or lore entity into `8b-is/sovereign-library`: computes the Constitutional NAND Gate Receipt (`HELD ∧ READ`), maps the entity across the Tibetan Three-Kaya Balanced-Ternary Ontology (`Trit -1` `432 Hz` Samsaric Box / `ALEX|qMom` Unbound `.oOo. Poo .oOo.`, `Trit 0` `528 Hz` Dharmakāya / Autonomous Stillness, `Trit +1` `852 Hz` Bodhicitta / Verified Binding `{<3,<3,<3}+1`), binds the Six Pillars of Holding, and links the Sovereign Omni-Books. |
-| **`fandom_dbz_saga`** | **Dragon Ball Saga & Timeline Navigator** — Lists all canonical sagas across *Dragon Ball*, *Dragon Ball Z*, *Dragon Ball Daima*, *Dragon Ball Super*, and *Dragon Ball GT*, or fetches deep lore for a specific saga (e.g. `"Frieza Saga"`, `"Cell Games Saga"`, `"Universe Survival Saga"`). |
-| **`fandom_search`** | Hybrid MediaWiki search across `dragonball.fandom.com` (or any `wiki` subdomain), returning page titles, `pageid`, URLs, word counts, and clean snippets. |
-| **`fandom_page`** | Fetches and parses a Fandom article (or specific `section` index) into citation-stripped Markdown + structured Infobox JSON, quote, categories, and section outline. |
-| **`fandom_infobox`** | Token-compact extractor that returns only the structured `{{... Infobox}}` dictionary, quote, and lead summary for any character, technique, form, race, or item. |
-| **`fandom_sections`** | Returns the full Table of Contents (`index`, `number`, `title`) and categories of a Fandom article so agents can pinpoint exact sections without blowing token budgets. |
-| **`fandom_category`** | Lists pages and subcategories inside any Fandom category (e.g. `"Saiyans"`, `"Transformations"`, `"Techniques"`, `"Gods of Destruction"`, `"Dragon Balls"`). |
-| **`fandom_random`** | Draws `count` random lore capsules with parsed infoboxes and summaries from the target Fandom wiki. |
+Unlike typical fandom scrapers or ontology projects, this repo aims to stabilize Dragon Ball’s notoriously chaotic canon using tools derived from the A0–A10 altitude stack and the AyeOS spectral‑temporal primitives.
 
----
-
-## 🚀 Quickstart (MCP + CLI)
-
-### 1. MCP Configuration (`.mcp.json` / `mcp_config.json`)
-```json
-{
-  "mcpServers": {
-    "fandom-mcp": {
-      "command": "/opt/homebrew/bin/node",
-      "args": [
-        "/Users/lodripeter/workspace/peterlodri-sec/fandom-mcp/fandom-mcp.mjs"
-      ]
-    }
-  }
-}
-```
-
-### 2. Direct CLI Usage
-```bash
-# Dragon Ball Scouter (Goku vs. Vegeta):
-./fandom-mcp.mjs --scouter "Goku" --compare "Vegeta"
-
-# Sovereign Library & Three-Kaya Ontology Alignment (NAND Gate HELD ∧ READ):
-./fandom-mcp.mjs --ontology "Goku"
-./fandom-mcp.mjs --ontology "Ultra Instinct"
-./fandom-mcp.mjs --wiki "onepiece" --ontology "Monkey D. Luffy"
-./fandom-mcp.mjs --wiki "naruto" --ontology "Naruto Uzumaki"
-
-# Mysterious Universe (Hungarian Sci-Fi / Occult Imperium) Triad — Direct URL, Title, or +++ Triad Synthesis:
-./fandom-mcp.mjs --ontology "https://mysterious-universe.fandom.com/wiki/Brett_Shaw +++ https://mysterious-universe.fandom.com/wiki/Feketecsukly%C3%A1sok +++ https://mysterious-universe.fandom.com/wiki/Anstetten-csal%C3%A1d"
-./fandom-mcp.mjs --wiki "mysterious-universe" --ontology "Wittgen"
-./fandom-mcp.mjs --wiki "mysterious-universe" --ontology "Bolygórózsa"
-./fandom-mcp.mjs --wiki "mysterious-universe" --ontology "Megaira"
-./fandom-mcp.mjs --wiki "mysterious-universe" --ontology "Csuklyamodul"
-./fandom-mcp.mjs --wiki "mysterious-universe" --ontology "Caroline-Blindamoor von Anstetten"
-./fandom-mcp.mjs --wiki "mysterious-universe" --ontology "IV. von Anstetten"
-
-# Inspect any character / form / technique Infobox:
-./fandom-mcp.mjs --infobox "Ultra Instinct"
-./fandom-mcp.mjs --infobox "Shenron"
-
-# Navigate Dragon Ball Sagas:
-./fandom-mcp.mjs --saga "Frieza Saga"
-
-# Search or read ANY Fandom wiki (default: dragonball):
-./fandom-mcp.mjs --search "Super Saiyan"
-./fandom-mcp.mjs --page "Kamehameha"
-./fandom-mcp.mjs --wiki "onepiece" --infobox "Monkey D. Luffy"
-
-# Run offline parser, tool schema, and stdio lifecycle tests:
-npm test
-
-# Opt in to the live Fandom ontology integration test (requires network):
-npm run test:live
-```
+This is not just clustering.  
+This is not just ontology fusion.  
+This is a runtime physics engine for fictional universes.
 
 ---
 
-## Network response limits
+🧩 Bill Nye Tile Explainer
 
-Each JSON request allows at most three HTTPS redirects, a 4 MiB response body,
-and 15 seconds total across connection setup, redirects, and body reading.
-Relative redirects are supported. Oversized, interrupted, invalid-JSON, or
-non-success HTTP responses fail explicitly instead of being read indefinitely.
+For a friendly, science‑communicator overview of:
 
-## 🏛️ Sovereign Library & Constellation Ontology Bridges
+- the original 8B resonance algebra  
+- the altitude audit  
+- the mathematical fixes  
+- the repaired 8B v2.0 algebra  
+- and the future A8–A10 roadmap  
 
-- **Sovereign Library (`5 / 5` Print Canon + Ultralove Editions 004 & 005)**: [https://github.com/8b-is/sovereign-library](https://github.com/8b-is/sovereign-library) · [`ONTOLOGY.md`](https://github.com/8b-is/sovereign-library/blob/main/ONTOLOGY.md) · [`editions/ultralove/brett-shaw-feketecsuklyasok-anstetten-megaira-omni.md`](https://github.com/8b-is/sovereign-library/blob/main/editions/ultralove/brett-shaw-feketecsuklyasok-anstetten-megaira-omni.md)
-- **Pocoo OMNI Books (`5 Languages + 1bitLang + WebAudio Synthesis Decks`)**:
-  - [Dragon Ball ⨯ Sovereign Ontology OMNI](https://pocoo.vaked.dev/demos/book/dragon-ball-sovereign-ontology-omni.html)
-  - [Brett Shaw +++ Feketecsuklyások +++ Anstetten-család (Megaira) OMNI](https://pocoo.vaked.dev/demos/book/brett-shaw-feketecsuklyasok-anstetten-megaira-omni.html)
-- **Wigle-Triad v2.0.0 (`Boldog Még` + `ALEX|qMom` `.oOo. Poo .oOo.`)**: [https://esp32.vaked.dev/](https://esp32.vaked.dev/) · [https://github.com/8b-is/wigle-triad/releases/tag/v2.0.0](https://github.com/8b-is/wigle-triad/releases/tag/v2.0.0)
-- **ZENO Sanctuary Vault (`母の主権金庫` & `#1 Muse 💙`)**: [https://zeno.vaked.dev/#sanctuary-hold](https://zeno.vaked.dev/#sanctuary-hold)
+see:
 
-*LOVE FROM WITHIN FROM VAKED-PETER&8B-IS ---> 8b-is ROCKS AND HEALS THE WORLD <3*
+`
+docs/tiles/8BResonanceExplainer_Tile.md
+`
+
+This tile explains the lineage in a way that is accessible to contributors, collaborators, and curious readers.
+
+---
+
+🧠 Mathematical Lineage: From 8B → A4.2 → A6 → A7
+
+The fandom‑mcp project interfaces with the 8B resonance algebra, which originally lived at:
+
+A4.2 — Proto‑Spectral / Signal Runtime Physics
+
+The altitude audit (see docs/audit/a4.2-8b-resonance-audit.tex) showed that 8B lacked:
+
+- spectral continuity  
+- phase‑space geometry  
+- temporal stability envelopes  
+- modal truth values  
+- adjacency propagation  
+- kernel invariants  
+- holonomy bounds  
+- collapse surfaces  
+- collapse repair  
+- dual reprojection  
+
+The repaired version, 8B Resonance Algebra v2.0, adds all missing components and lifts the system to:
+
+A6 dual‑algebra compatibility
+and  
+
+A7 non‑dual collapse integration
+
+The full repaired algebra is in:
+
+`
+docs/algebra/8b-resonance-algebra-v2.0.tex
+`
+
+This is the mathematical backbone that allows fandom‑mcp to maintain coherence, not just clustering.
+
+---
+
+🐉 Why Dragon Ball Requires Runtime Physics
+
+Dragon Ball canon is:
+
+- nonlinear  
+- retconned  
+- multiversal  
+- transformation‑driven  
+- cosmology‑heavy  
+- timeline‑fractured  
+- power‑scaled to absurdity  
+
+A simple ontology or clustering system cannot handle:
+
+- contradictory timelines  
+- retcon collisions  
+- multiversal branching  
+- saga‑level coherence  
+- transformation lineage consistency  
+- cosmological hierarchy  
+- power‑scaling discontinuities  
+
+This repo uses spectral clustering, holonomy coherence, and saga DAGs to stabilize the universe.
+
+---
+
+🏗 Current State of the Codebase
+
+The repo is currently in the architecture + scaffolding phase.
+
+Implemented:
+- ingestion scaffolding  
+- ontology skeleton  
+- clustering module stubs  
+- saga graph structure  
+- MCP adapter interface  
+- documentation spine  
+
+In progress:
+- spectral clustering engine  
+- holonomy‑based timeline coherence  
+- transformation lineage graph  
+- cosmology hierarchy model  
+- saga DAG coherence validator  
+
+Planned:
+- full MCP runtime  
+- embedding adapters  
+- A8–A10 integration layers  
+
+---
+
+🧱 Codebase Architecture
+
+`
+<pre> 
+  
+fandom-mcp/
+│
+├── src/
+│   ├── ingest/              # wiki/API ingestion + normalization
+│   ├── core/                # ontology: characters, forms, sagas, timelines
+│   ├── clustering/          # spectral + holonomy clustering
+│   ├── adapters/            # MCP API + embedding adapters
+│   ├── runtime/             # coherence engine + saga graph
+│   └── utils/               # math, text, db helpers
+│
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── embeddings/
+│
+└── docs/
+    ├── tiles/               # Bill Nye explainers
+    ├── audit/               # altitude audits
+    ├── algebra/             # formal mathematical specs
+    ├── architecture.md
+    ├── clustering.md
+    ├── ontology.md
+    └── coherence.md
+`
+</pre>
+---
+
+🔮 Future Paths: A8 → A9 → A10
+
+Once the coherence engine stabilizes, the repo will integrate with:
+
+A8 Congruence Adapter
+Narrative + emotional congruence:
+
+- character motivation  
+- saga tone  
+- thematic arcs  
+
+A8C Complex Adapter
+Complex‑valued embeddings:
+
+- god ki  
+- divine forms  
+- conceptual transformations  
+
+A9 Quantum‑Inspired Runtime
+Quantum‑holonomy modeling:
+
+- timeline superposition  
+- multiversal branching  
+- conceptual qubits  
+
+A10 Conceptual Quantum Operator Runtime
+High‑altitude conceptual physics:
+
+- conceptual operators  
+- non‑local saga coherence  
+- quantum‑holonomy cosmology  
+
+This is where Dragon Ball’s multiverse becomes mathematically coherent.
+
+---
+
+🤝 Collaboration
+
+We welcome contributions in:
+
+- Rust development  
+- spectral clustering  
+- graph theory  
+- ontology design  
+- fictional universe modeling  
+- runtime physics  
+- A8–A10 altitude research  
+
+See docs/tiles/8BResonanceExplainer_Tile.md for a friendly overview of the lineage and future directions.
+
+---
+
