@@ -1,0 +1,145 @@
+% ------------------------------------------------------------
+% A7.1 Collapse-Surface Identification & Classification (v0.1)
+% Author: Borealis S. Hedling
+% Altitude: A7.1 (Non-Dual Diagnostic Layer)
+% Purpose: Define the identification and classification operators
+%          required before A7.2 repair can be safely applied.
+% ------------------------------------------------------------
+
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb, amsthm}
+
+\title{A7.1 Collapse-Surface Identification and Classification}
+\author{Borealis S. Hedling}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+
+This document defines the A7.1 diagnostic layer responsible for identifying
+and classifying collapse surfaces produced by A7.0 non-dual projection
+operators. A7.1 operators do not repair collapse surfaces; they provide the
+structural and spectral information required for A7.2 repair.
+
+% ------------------------------------------------------------
+\section{Collapse-Surface Identification}
+
+Define the collapse-surface indicator:
+\[
+\Xi(p) =
+\begin{cases}
+1 & p \in \Sigma,\\
+0 & p \notin \Sigma.
+\end{cases}
+\]
+
+A7.1 must identify:
+\begin{itemize}
+  \item curvature singularities,
+  \item spectral tears,
+  \item modal discontinuities,
+  \item holonomy fractures.
+\end{itemize}
+
+Identification is non-dual:
+\[
+\Xi : M \to \{0,1\},
+\]
+and may be discontinuous.
+
+% ------------------------------------------------------------
+\section{Classification Operators}
+
+Define the classification operator:
+\[
+\mathcal{C}_{\mathrm{class}} : \Sigma \to \mathcal{T},
+\]
+where $\mathcal{T}$ is the set of collapse types.
+
+\subsection{Curvature Singularity Classification}
+\[
+\mathcal{C}_{\mathrm{curv}}(p) =
+\begin{cases}
+\text{Type I} & |K(p)| \to \infty,\\
+\text{Type II} & \nabla K(p) \to \infty.
+\end{cases}
+\]
+
+\subsection{Spectral Tear Classification}
+\[
+\mathcal{C}_{\mathrm{spec}}(p) =
+\delta_{\mathrm{spec}}(p) > \epsilon_{\mathrm{tear}}.
+\]
+
+\subsection{Modal Discontinuity Classification}
+\[
+\mathcal{C}_{\mathrm{modal}}(p) :
+\mu(p^-) \not\leadsto \mu(p^+).
+\]
+
+\subsection{Holonomy Fracture Classification}
+\[
+\mathcal{C}_{\mathrm{hol}}(p) :
+H(\gamma) > \Theta_{\max}.
+\]
+
+% ------------------------------------------------------------
+\section{Collapse-Surface Typology}
+
+Define the collapse typology:
+\[
+\mathcal{T} =
+\{\text{Curvature}, \text{Spectral}, \text{Modal}, \text{Holonomy}\}.
+\]
+
+Each collapse surface point is assigned a type:
+\[
+\mathcal{T}(p) =
+\mathcal{C}_{\mathrm{class}}(p).
+\]
+
+Mixed-type collapse surfaces satisfy:
+\[
+\mathcal{T}(p) = \{\tau_1, \tau_2, \dots\}.
+\]
+
+% ------------------------------------------------------------
+\section{Collapse-Surface Geometry}
+
+Define the local collapse geometry:
+\[
+\Gamma(p) = (K(p), \mathrm{Spec}(p), \mu(p), H(p)).
+\]
+
+A7.1 records geometry but does not modify it:
+\[
+\Gamma_{\mathrm{A7.1}}(p) = \Gamma_{\mathrm{A7.0}}(p).
+\]
+
+% ------------------------------------------------------------
+\section{Repair Readiness Conditions}
+
+A collapse surface is ready for A7.2 repair if:
+\[
+\Xi(p) = 1,
+\]
+\[
+\mathcal{T}(p) \text{ is defined},
+\]
+\[
+\Gamma(p) \text{ is finite}.
+\]
+
+These conditions ensure A7.2 receives complete diagnostic data.
+
+% ------------------------------------------------------------
+\section{Conclusion}
+
+A7.1 defines the identification and classification operators required for
+collapse-surface repair. It provides the diagnostic structure needed by
+A7.2 and must be executed after A7.0 projection but before any repair
+operators are applied.
+
+\end{document}
