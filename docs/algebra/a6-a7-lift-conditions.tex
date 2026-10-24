@@ -1,0 +1,138 @@
+% ------------------------------------------------------------
+% A6 → A7 Lift Conditions (v0.1)
+% Author: Borealis S. Hedling
+% Altitude: A6.9 (Lift Layer)
+% Purpose: Define the boundary conditions required for a safe
+%          transition from dual-algebra A6 to non-dual A7.
+% ------------------------------------------------------------
+
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb, amsthm}
+
+\title{A6 → A7 Lift Conditions: Non-Dual Transition Requirements}
+\author{Borealis S. Hedling}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+
+This document defines the lift conditions required for a safe transition
+from A6 dual-algebra to A7 non-dual algebra. The lift requires continuity,
+spectral stability, holonomy bounds, collapse locality, semantic and
+provenance monotonicity, and kernel invariance. These conditions ensure
+that non-dual operators do not fracture the A6 manifold.
+
+% ------------------------------------------------------------
+\section{Lift Condition 1: Curvature Lift Continuity}
+
+Curvature lift must satisfy:
+\[
+\lim_{\alpha \to 1^-} K_{\mathrm{A7}}(\alpha p)
+  = K_{\mathrm{A6}}(p).
+\]
+
+This ensures curvature does not jump during the lift.
+
+% ------------------------------------------------------------
+\section{Lift Condition 2: Spectral Lift Stability}
+
+Spectral mismatch must satisfy:
+\[
+\delta_{\mathrm{spec}}^{\mathrm{A7}}(p)
+  < \delta_{\mathrm{spec}}^{\mathrm{A6}}(p)
+  + \epsilon.
+\]
+
+This ensures spectral continuity across the lift boundary.
+
+% ------------------------------------------------------------
+\section{Lift Condition 3: Holonomy Lift Bound}
+
+Holonomy must satisfy:
+\[
+H_{\mathrm{A7}}(\gamma)
+  < \Theta_{\max}^{\mathrm{A6}} + \Delta\Theta.
+\]
+
+This prevents holonomy fracture during non-dual emergence.
+
+% ------------------------------------------------------------
+\section{Lift Condition 4: Collapse-Surface Preservation}
+
+Collapse surfaces must remain localized:
+\[
+p \in \Sigma_{\mathrm{A6}}
+  \Rightarrow p \in \Sigma_{\mathrm{A7}}.
+\]
+
+This prevents collapse smearing across the lift boundary.
+
+% ------------------------------------------------------------
+\section{Lift Condition 5: Stability Envelope Lift}
+
+Stability envelopes must satisfy:
+\[
+E_{\mathrm{A7}}(p)
+  \ge E_{\mathrm{A6}}(p).
+\]
+
+This ensures monotone stability during the lift.
+
+% ------------------------------------------------------------
+\section{Lift Condition 6: Modal Lift Coherence}
+
+Modal truth must satisfy:
+\[
+\mu_{\mathrm{A6}}(p) \leadsto \mu_{\mathrm{A7}}(p).
+\]
+
+This preserves semantic invariants across the lift.
+
+% ------------------------------------------------------------
+\section{Lift Condition 7: Provenance Lift Coherence}
+
+Provenance must satisfy:
+\[
+I_{\mathrm{prov}}^{\mathrm{A6}}(p)
+  \Rightarrow
+I_{\mathrm{prov}}^{\mathrm{A7}}(p).
+\]
+
+This prevents provenance discontinuity.
+
+% ------------------------------------------------------------
+\section{Lift Condition 8: Kernel Lift Preservation}
+
+The unified kernel must satisfy:
+\[
+K_{\mathrm{A6}}(p)
+  \Rightarrow
+K_{\mathrm{A7}}(p).
+\]
+
+This ensures kernel invariants survive the non-dual transition.
+
+% ------------------------------------------------------------
+\section{Lift Condition 9: Operator Lift Determinism}
+
+Operators must satisfy:
+\[
+\mathcal{O}_{\mathrm{A7}}(p)
+  = \mathcal{O}_{\mathrm{A7}}(q)
+  \Rightarrow p = q.
+\]
+
+This prevents operator ambiguity during the lift.
+
+% ------------------------------------------------------------
+\section{Conclusion}
+
+These nine lift conditions define the boundary layer required for a safe
+transition from A6 dual-algebra to A7 non-dual algebra. They ensure that
+non-dual operators do not fracture continuity, spectral stability, holonomy,
+collapse locality, semantic invariants, provenance invariants, or kernel
+structure.
+
+\end{document}
