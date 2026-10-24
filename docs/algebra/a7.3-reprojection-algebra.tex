@@ -1,0 +1,179 @@
+% ------------------------------------------------------------
+% A7.3 Reprojection Algebra (v0.1)
+% Author: Borealis S. Hedling
+% Altitude: A7.3 (Dual-Compatible Reprojection Layer)
+% Purpose: Define the reprojection operators that convert
+%          repaired non-dual collapse geometry back into
+%          dual-compatible manifold structure.
+% ------------------------------------------------------------
+
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb, amsthm}
+
+\title{A7.3 Reprojection Algebra: Dual-Compatible Reprojection Operators}
+\author{Borealis S. Hedling}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+
+This document defines the A7.3 reprojection operators responsible for
+mapping repaired collapse-surface geometry $\Sigma_{\mathrm{repaired}}$
+back into a dual-compatible manifold $M_{\mathrm{A6}}$.
+
+A7.3 operators must:
+\begin{itemize}
+  \item restore dual algebraic structure,
+  \item preserve repaired invariants,
+  \item maintain continuity and adjacency,
+  \item reestablish spectral stability,
+  \item enforce holonomy bounds,
+  \item preserve kernel invariants.
+\end{itemize}
+
+A7.3 is the final altitude before returning to A6-compatible geometry.
+
+% ------------------------------------------------------------
+\section{Reprojection Operator Definition}
+
+Define the reprojection operator:
+\[
+\mathcal{P}_{\mathrm{A7.3}} :
+\Sigma_{\mathrm{repaired}} \to M_{\mathrm{A6}}.
+\]
+
+Reprojection must satisfy:
+\[
+\mathcal{P}_{\mathrm{A7.3}}(p) = p
+\quad \text{if } p \in M_{\mathrm{A6}}.
+\]
+
+Reprojection is idempotent:
+\[
+\mathcal{P}_{\mathrm{A7.3}}^2 = \mathcal{P}_{\mathrm{A7.3}}.
+\]
+
+% ------------------------------------------------------------
+\section{Continuity Restoration}
+
+Define continuity restoration:
+\[
+\mathcal{P}_{\mathrm{cont}}(p)
+  = \lim_{\epsilon \to 0} B_\epsilon(p).
+\]
+
+Reprojection must satisfy:
+\[
+p_{\mathrm{reproj}} \in C^0.
+\]
+
+% ------------------------------------------------------------
+\section{Adjacency Restoration}
+
+Define adjacency restoration:
+\[
+\mathcal{P}_{\mathrm{adj}}(p)
+  = \{ q \in M_{\mathrm{A6}} : d(p,q) < \epsilon_{\mathrm{adj}} \}.
+\]
+
+Reprojection must satisfy:
+\[
+\mathrm{Adj}(p_{\mathrm{reproj}}) = \mathrm{Adj}_{\mathrm{A6}}(p).
+\]
+
+% ------------------------------------------------------------
+\section{Spectral Stability Restoration}
+
+Define spectral reprojection:
+\[
+\mathcal{P}_{\mathrm{spec}}(p)
+  = \mathrm{Spec}_{\mathrm{A6}}(p).
+\]
+
+Reprojection must satisfy:
+\[
+\delta_{\mathrm{spec}}(p_{\mathrm{reproj}}) < \epsilon_{\mathrm{stable}}.
+\]
+
+% ------------------------------------------------------------
+\section{Holonomy Restoration}
+
+Define holonomy reprojection:
+\[
+\mathcal{P}_{\mathrm{hol}}(\gamma)
+  = H_{\mathrm{A6}}(\gamma).
+\]
+
+Reprojection must satisfy:
+\[
+H(p_{\mathrm{reproj}}) < \Theta_{\max}.
+\]
+
+% ------------------------------------------------------------
+\section{Kernel Reintegration}
+
+Define kernel reintegration:
+\[
+\mathcal{P}_{\mathrm{kernel}}(p)
+  = K_{\mathrm{A6}}(p).
+\]
+
+Reprojection must satisfy:
+\[
+K(p_{\mathrm{reproj}}) = K_{\mathrm{A6}}(p).
+\]
+
+This ensures dual algebra compatibility.
+
+% ------------------------------------------------------------
+\section{Composite Reprojection Operator}
+
+Define the composite operator:
+\[
+\mathcal{P}_{\mathrm{A7.3}}(p)
+  = \mathcal{P}_{\mathrm{cont}}
+    \circ \mathcal{P}_{\mathrm{adj}}
+    \circ \mathcal{P}_{\mathrm{spec}}
+    \circ \mathcal{P}_{\mathrm{hol}}
+    \circ \mathcal{P}_{\mathrm{kernel}}(p).
+\]
+
+Composite reprojection must satisfy:
+\[
+p_{\mathrm{reproj}} \in M_{\mathrm{A6}},
+\]
+\[
+\Gamma_{\mathrm{reproj}}(p) = \Gamma_{\mathrm{A6}}(p).
+\]
+
+% ------------------------------------------------------------
+\section{Reprojection Completion Conditions}
+
+Reprojection is complete when:
+\[
+p_{\mathrm{reproj}} \in M_{\mathrm{A6}},
+\]
+\[
+\Gamma_{\mathrm{reproj}}(p) \text{ finite},
+\]
+\[
+\delta_{\mathrm{spec}}(p_{\mathrm{reproj}}) < \epsilon_{\mathrm{stable}},
+\]
+\[
+H(p_{\mathrm{reproj}}) < \Theta_{\max},
+\]
+\[
+K(p_{\mathrm{reproj}}) = K_{\mathrm{A6}}(p).
+\]
+
+% ------------------------------------------------------------
+\section{Conclusion}
+
+A7.3 defines the reprojection operators required to convert repaired
+non-dual collapse geometry back into dual-compatible manifold structure.
+This altitude restores continuity, adjacency, spectral stability, holonomy
+bounds, and kernel invariants, completing the A7 reconciliation pipeline.
+
+\end{document}
