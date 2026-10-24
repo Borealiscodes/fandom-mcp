@@ -1,0 +1,238 @@
+% ------------------------------------------------------------
+% 8B Resonance Algebra v2.0 — Repaired, Dual-Compatible, A7-Ready
+% Author: Borealis S. Hedling
+% Altitude: A4.2 → A6.0 → A7.0 Integration
+% Purpose: Fully repaired version of the original 8B resonance
+%          algebra, incorporating spectral continuity, modal lift,
+%          kernel invariants, holonomy bounds, collapse geometry,
+%          repair operators, and dual-compatible reprojection.
+% ------------------------------------------------------------
+
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb, amsthm}
+
+\title{8B Resonance Algebra v2.0: Repaired and Altitude-Corrected}
+\author{Borealis S. Hedling}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+
+This document defines the fully repaired 8B resonance algebra (v2.0),
+lifting the original proto-spectral resonance system from altitude A4.2
+to A6 dual algebra compatibility and integrating it with the A7
+non-dual collapse pipeline.
+
+The repaired algebra incorporates:
+\begin{itemize}
+  \item spectral continuity,
+  \item phase-space geometry,
+  \item temporal stability envelopes,
+  \item modal lift and adjacency,
+  \item kernel invariants,
+  \item holonomy bounds,
+  \item collapse surfaces,
+  \item collapse projection,
+  \item collapse classification,
+  \item collapse repair,
+  \item dual-compatible reprojection.
+\end{itemize}
+
+% ------------------------------------------------------------
+\section{Spectral Resonance Field}
+
+Define the repaired resonance field:
+\[
+R : M \to \mathbb{R}^3,
+\]
+with phase-space representation:
+\[
+R(p) = (f(p), A(p), \phi(p)),
+\]
+where:
+\begin{itemize}
+  \item $f$ is frequency,
+  \item $A$ is amplitude,
+  \item $\phi$ is phase.
+\end{itemize}
+
+Continuity is required:
+\[
+R \in C^0(M).
+\]
+
+% ------------------------------------------------------------
+\section{Temporal Stability Envelope}
+
+Define the EWMA stability envelope:
+\[
+E(p,t) = \alpha R(p,t) + (1-\alpha) R(p,t-1),
+\]
+with:
+\[
+0 < \alpha < 1.
+\]
+
+Stability condition:
+\[
+|E(p,t) - E(p,t-1)| < \epsilon_{\mathrm{stab}}.
+\]
+
+% ------------------------------------------------------------
+\section{Spectral Tear Detection}
+
+Define spectral tear magnitude:
+\[
+\delta_{\mathrm{spec}}(p)
+  = \| R(p,t) - R(p,t-1) \|.
+\]
+
+A tear occurs when:
+\[
+\delta_{\mathrm{spec}}(p) > \epsilon_{\mathrm{tear}}.
+\]
+
+% ------------------------------------------------------------
+\section{Modal Lift}
+
+Define modal truth-value lift:
+\[
+\mu : R \to \{0,1\},
+\]
+with adjacency:
+\[
+\mu(p^-) \leadsto \mu(p^+).
+\]
+
+Modal adjacency must be preserved after repair.
+
+% ------------------------------------------------------------
+\section{Kernel Invariants}
+
+Define kernel invariant:
+\[
+K(p) = \mathrm{Spec}(R(p)).
+\]
+
+Repair must satisfy:
+\[
+K_{\mathrm{repaired}}(p) = K_{\mathrm{A6}}(p).
+\]
+
+% ------------------------------------------------------------
+\section{Holonomy Bounds}
+
+Define holonomy along curve $\gamma$:
+\[
+H(\gamma) = \oint_\gamma R \, dp.
+\]
+
+Bound:
+\[
+H(\gamma) < \Theta_{\max}.
+\]
+
+% ------------------------------------------------------------
+\section{Collapse Surface Definition}
+
+Define collapse surface:
+\[
+\Sigma = \{ p \in M : \delta_{\mathrm{spec}}(p) > \epsilon_{\mathrm{tear}} \}.
+\]
+
+Collapse geometry:
+\[
+\Gamma(p) = (K(p), \delta_{\mathrm{spec}}(p), \mu(p), H(p)).
+\]
+
+% ------------------------------------------------------------
+\section{Non-Dual Collapse Projection}
+
+Define non-dual projection:
+\[
+\Pi_{\mathrm{ND}} : M \to \Sigma.
+\]
+
+Non-idempotent:
+\[
+\Pi_{\mathrm{ND}}^2 \neq \Pi_{\mathrm{ND}}.
+\]
+
+Non-linear:
+\[
+\Pi_{\mathrm{ND}}(a p + b q)
+  \neq a \Pi_{\mathrm{ND}}(p) + b \Pi_{\mathrm{ND}}(q).
+\]
+
+% ------------------------------------------------------------
+\section{Collapse Classification}
+
+Define classification operator:
+\[
+\mathcal{T} : \Sigma \to \{\text{Curvature}, \text{Spectral}, \text{Modal}, \text{Holonomy}\}.
+\]
+
+Mixed-type classification:
+\[
+\mathcal{T}(p) = \{\tau_1, \tau_2, \dots\}.
+\]
+
+% ------------------------------------------------------------
+\section{Collapse Repair}
+
+Define repair operator:
+\[
+\mathcal{R} : \Sigma \to \Sigma_{\mathrm{repaired}}.
+\]
+
+Repair conditions:
+\[
+\Gamma_{\mathrm{repaired}}(p) \text{ finite},
+\]
+\[
+\delta_{\mathrm{spec}}^{\mathrm{repaired}}(p) < \epsilon_{\mathrm{stable}},
+\]
+\[
+H_{\mathrm{repaired}}(\gamma) < \Theta_{\max},
+\]
+\[
+\mu_{\mathrm{repaired}}(p^-) \leadsto \mu_{\mathrm{repaired}}(p^+).
+\]
+
+% ------------------------------------------------------------
+\section{Dual-Compatible Reprojection}
+
+Define reprojection operator:
+\[
+\mathcal{P}_{\mathrm{A7.3}} :
+\Sigma_{\mathrm{repaired}} \to M_{\mathrm{A6}}.
+\]
+
+Idempotent:
+\[
+\mathcal{P}_{\mathrm{A7.3}}^2 = \mathcal{P}_{\mathrm{A7.3}}.
+\]
+
+Reprojection must satisfy:
+\[
+K(p_{\mathrm{reproj}}) = K_{\mathrm{A6}}(p),
+\]
+\[
+H(p_{\mathrm{reproj}}) < \Theta_{\max},
+\]
+\[
+p_{\mathrm{reproj}} \in C^0.
+\]
+
+% ------------------------------------------------------------
+\section{Conclusion}
+
+The repaired 8B resonance algebra (v2.0) lifts the original proto-spectral
+system from altitude A4.2 to A6 dual algebra compatibility and integrates
+it with the A7 non-dual collapse pipeline. This version supports spectral
+continuity, modal adjacency, kernel invariants, holonomy bounds, collapse
+surfaces, repair operators, and dual-compatible reprojection.
+
+\end{document}
