@@ -1,0 +1,200 @@
+% ------------------------------------------------------------
+% A7.2 Collapse-Surface Repair Algebra (v0.1)
+% Author: Borealis S. Hedling
+% Altitude: A7.2 (Non-Dual Repair Layer)
+% Purpose: Define the repair operators that act on collapse
+%          surfaces Σ after A7.1 classification.
+% ------------------------------------------------------------
+
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb, amsthm}
+
+\title{A7.2 Collapse-Surface Repair Algebra}
+\author{Borealis S. Hedling}
+\date{October 2026}
+
+\begin{document}
+\maketitle
+
+\section*{Overview}
+
+This document defines the A7.2 repair operators responsible for restoring
+continuity, spectral stability, modal adjacency, holonomy bounds, and
+curvature regularity on collapse surfaces $\Sigma$. These operators act
+only after A7.1 classification and prepare the geometry for A7.3
+dual-compatible reprojection.
+
+A7.2 operators are non-dual but must produce dual-compatible output.
+
+% ------------------------------------------------------------
+\section{Repair Operator Framework}
+
+Define the repair operator:
+\[
+\mathcal{R} : \Sigma \to \Sigma_{\mathrm{repaired}}.
+\]
+
+Repair must satisfy:
+\[
+\Gamma_{\mathrm{A7.2}}(p) \text{ finite},
+\]
+\[
+\mathcal{T}(p) \text{ defined},
+\]
+\[
+\Xi(p) = 1.
+\]
+
+Where $\Gamma$ is collapse geometry and $\mathcal{T}$ is collapse type.
+
+% ------------------------------------------------------------
+\section{Curvature Repair Operators}
+
+Curvature singularities require smoothing:
+\[
+\mathcal{R}_{\mathrm{curv}}(p)
+  = K(p) - \Delta K(p),
+\]
+where:
+\[
+\Delta K(p) = \partial^2 K(p) \cdot \alpha_{\mathrm{smooth}}.
+\]
+
+Curvature repair must satisfy:
+\[
+|K_{\mathrm{repaired}}(p)| < K_{\max}.
+\]
+
+% ------------------------------------------------------------
+\section{Spectral Tear Repair Operators}
+
+Spectral tears require closure:
+\[
+\mathcal{R}_{\mathrm{spec}}(p)
+  = \mathrm{Spec}(p) - \delta_{\mathrm{tear}}(p).
+\]
+
+Define tear magnitude:
+\[
+\delta_{\mathrm{tear}}(p)
+  = \delta_{\mathrm{spec}}(p) - \epsilon_{\mathrm{seal}}.
+\]
+
+Repair condition:
+\[
+\delta_{\mathrm{spec}}^{\mathrm{repaired}}(p)
+  < \epsilon_{\mathrm{stable}}.
+\]
+
+% ------------------------------------------------------------
+\section{Modal Discontinuity Repair Operators}
+
+Modal discontinuities require adjacency restoration:
+\[
+\mathcal{R}_{\mathrm{modal}}(p^- , p^+)
+  = \mu(p^+) \leftarrow \mu(p^-).
+\]
+
+Repair condition:
+\[
+\mu_{\mathrm{repaired}}(p^-) \leadsto \mu_{\mathrm{repaired}}(p^+).
+\]
+
+% ------------------------------------------------------------
+\section{Holonomy Fracture Repair Operators}
+
+Holonomy fractures require bounded correction:
+\[
+\mathcal{R}_{\mathrm{hol}}(\gamma)
+  = H(\gamma) - \Delta H(\gamma),
+\]
+where:
+\[
+\Delta H(\gamma) = H(\gamma) - \Theta_{\max}.
+\]
+
+Repair condition:
+\[
+H_{\mathrm{repaired}}(\gamma) < \Theta_{\max}.
+\]
+
+% ------------------------------------------------------------
+\section{Mixed-Type Repair Operators}
+
+Mixed collapse types require composite repair:
+\[
+\mathcal{R}_{\mathrm{mix}}(p)
+  = \bigcup_{\tau \in \mathcal{T}(p)} \mathcal{R}_{\tau}(p).
+\]
+
+Composite repair must satisfy:
+\[
+\Gamma_{\mathrm{repaired}}(p) \text{ finite and stable}.
+\]
+
+% ------------------------------------------------------------
+\section{Locality and Stability Constraints}
+
+Repair locality radius:
+\[
+r_{\mathrm{repair}}(p)
+  = r_{\mathrm{loc}}(p) + \Delta r(p),
+\]
+where $\Delta r(p)$ is determined by collapse severity.
+
+Stability envelope after repair:
+\[
+E_{\mathrm{A7.2}}(p)
+  = E_{\mathrm{A6}}(p) + \Delta E_{\mathrm{repair}}(p),
+\]
+with:
+\[
+\Delta E_{\mathrm{repair}}(p) \ge 0.
+\]
+
+% ------------------------------------------------------------
+\section{Kernel Restoration}
+
+Define kernel restoration operator:
+\[
+\mathcal{R}_{\mathrm{kernel}}(p)
+  = K_{\mathrm{A6}}(p).
+\]
+
+Repair must ensure:
+\[
+K_{\mathrm{repaired}}(p) = K_{\mathrm{A6}}(p).
+\]
+
+This prepares geometry for A7.3 reprojection.
+
+% ------------------------------------------------------------
+\section{Repair Completion Conditions}
+
+Repair is complete when:
+\[
+\Gamma_{\mathrm{repaired}}(p) \text{ finite},
+\]
+\[
+\delta_{\mathrm{spec}}^{\mathrm{repaired}}(p) < \epsilon_{\mathrm{stable}},
+\]
+\[
+H_{\mathrm{repaired}}(\gamma) < \Theta_{\max},
+\]
+\[
+\mu_{\mathrm{repaired}}(p^-) \leadsto \mu_{\mathrm{repaired}}(p^+),
+\]
+\[
+K_{\mathrm{repaired}}(p) = K_{\mathrm{A6}}(p).
+\]
+
+% ------------------------------------------------------------
+\section{Conclusion}
+
+A7.2 defines the repair operators required to restore collapse surfaces
+to dual-compatible geometry. These operators smooth curvature, seal
+spectral tears, restore modal adjacency, correct holonomy fractures,
+and reestablish kernel invariants. A7.2 prepares the manifold for
+A7.3 reprojection.
+
+\end{document}
