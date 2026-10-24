@@ -149,6 +149,7 @@ Hedling, B. S. (2026).
 *Coherent Manifold Construction for Fictional Universes:  
 Altitude Models, Spectral Geometry, and Conceptual Embeddings.*  
 Preprint.
+https://doi.org/10.5281/zenodo.23627038 
 
 ---
 
