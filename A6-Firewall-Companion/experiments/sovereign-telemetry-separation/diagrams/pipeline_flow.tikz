@@ -1,0 +1,35 @@
+\begin{tikzpicture}[node distance=2.2cm, auto, >=latex']
+
+\tikzstyle{block} = [rectangle, draw, rounded corners,
+                     minimum height=1.2cm, minimum width=2.8cm]
+
+% Nodes
+\node[block] (minus1) {TRIT $-1$ Matrix};
+\node[block, right of=minus1] (norm1) {Lane 2\\Normalization};
+\node[block, right of=norm1] (zero) {TRIT $0$ Matrix};
+\node[block, right of=zero] (norm0) {Lane 2\\Normalization};
+\node[block, right of=norm0] (plus1) {TRIT $+1$ Matrix};
+\node[block, right of=plus1] (norm2) {Lane 2\\Normalization};
+
+\node[block, below of=norm0, yshift=-1.2cm] (fuse)
+    {Block-Diagonal Fusion};
+
+\node[block, below of=fuse, yshift=-1.2cm] (lane1)
+    {Lane 1\\80D Manifold Embedding};
+
+\node[block, below of=lane1, yshift=-1.2cm] (output)
+    {Final $80$D Conceptual Manifold};
+
+% Arrows
+\draw[->] (minus1) -- (norm1);
+\draw[->] (zero) -- (norm0);
+\draw[->] (plus1) -- (norm2);
+
+\draw[->] (norm1) |- (fuse);
+\draw[->] (norm0) -- (fuse);
+\draw[->] (norm2) |- (fuse);
+
+\draw[->] (fuse) -- (lane1);
+\draw[->] (lane1) -- (output);
+
+\end{tikzpicture}
