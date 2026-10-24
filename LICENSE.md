@@ -1,8 +1,3 @@
-Here is your fully rewritten, final, production‑ready LICENSE.md, incorporating:
-
-- Allowed commercial use (non‑military, ethical, narrative, educational)  
-- Prohibited commercial use (military, surveillance, dual‑use inversion)  
-- Humanitarian harm‑modeling exception  
 # Geometric Architecture, 8B Algebra, Fictional Universe Manifold Toolkit
 
 ---
