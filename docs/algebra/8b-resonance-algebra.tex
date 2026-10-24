@@ -1,0 +1,84 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb}
+
+\title{Baseline Formalization of the 8B Resonance Algebra}
+\author{Borealis Hedling}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Resonance State Space}
+
+The 8B resonance algebra operates over a balanced ternary state space
+\[
+R = \{-1, 0, +1\}.
+\]
+These states correspond to categorical resonance modes. No metric structure is assumed.
+
+\section{Resonance Addition}
+
+Define the resonance addition operator $\oplus : R \times R \to R$ by
+\[
+R_i \oplus R_j = \operatorname{sgn}(R_i + R_j),
+\]
+where $\operatorname{sgn}$ is the sign function
+\[
+\operatorname{sgn}(x) =
+\begin{cases}
+-1 & x < 0,\\
+0 & x = 0,\\
++1 & x > 0.
+\end{cases}
+\]
+
+This operator is non-associative and non-metric.
+
+\section{Semantic NAND Operator}
+
+The 8B system defines a semantic NAND operator over resonance states:
+\[
+\operatorname{NAND}(H, R) = \neg(H \land R).
+\]
+
+In the resonance algebra, this is implemented as
+\[
+\operatorname{NAND}(H, R) = R \oplus (-H),
+\]
+where $H, R \in R$.
+
+\section{Kaya Projection}
+
+A categorical projection $\pi : \mathbb{R} \to R$ is defined by
+\[
+\pi(x) = \operatorname{sgn}(x).
+\]
+
+This projection collapses all continuous structure into the ternary lattice.
+
+\section{Ontology Fusion Operator}
+
+For two entities $A$ and $B$ with resonance states $R_A$ and $R_B$, the ontology fusion operator is defined as
+\[
+F(A, B) = \pi\left( R_A \oplus R_B \right).
+\]
+
+This operator is responsible for the collapse of distinct ontological ecosystems into fused resonance clusters.
+
+\section{Properties}
+
+\begin{itemize}
+    \item The algebra is non-metric; triangle inequality does not hold.
+    \item Resonance addition is non-associative:
+    \[
+    (R_1 \oplus R_2) \oplus R_3 \neq R_1 \oplus (R_2 \oplus R_3).
+    \]
+    \item Projection $\pi$ destroys manifold structure.
+    \item Ontology fusion $F$ is a categorical collapse operator.
+\end{itemize}
+
+\section{Summary}
+
+The 8B resonance algebra is a ternary, non-geometric system whose operators induce ontology fusion rather than manifold separation. It is suitable for resonance-based symbolic alignment but incompatible with metric or geometric compression frameworks.
+
+\end{document}
