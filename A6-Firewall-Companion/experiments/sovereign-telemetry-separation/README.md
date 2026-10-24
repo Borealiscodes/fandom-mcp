@@ -77,6 +77,8 @@ analysis/technical_analysis.tex
 📁 Folder Structure
 
 `
+<pre> 
+
 sovereign-telemetry-separation/
 │
 ├── matrices/
@@ -99,6 +101,8 @@ sovereign-telemetry-separation/
 │
 └── README.md   ← you are here
 `
+
+</pre>
 
 ---
 
