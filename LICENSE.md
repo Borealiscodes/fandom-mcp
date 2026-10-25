@@ -5,7 +5,7 @@
 1. Copyright Attribution
 
 1.1 Original 8B Algebra (A4.2 Proto‑Spectral Layer)
-The original 8B resonance algebra (pre‑repair) is © Christopher Chenoweth.  
+The original 8B resonance algebra (pre‑repair) is © Christopher Chenoweth & Alexandra Chenoweth 
 This repository includes a derivative mathematical audit and repaired algebraic formulation based on that original work.
 
 1.2 Repaired 8B Resonance Algebra v2.0
