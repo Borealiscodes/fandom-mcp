@@ -130,15 +130,6 @@ These activities must:
 - not produce actionable harm,  
 - not support state or non‑state armed actors.
 
-6.1 Sensitive Human‑Rights Telemetry
-
-Researchers working with real‑world sensitive human‑rights telemetry, forensic evidence, or field‑risk environments should not use this repository for operational protection or provenance enforcement.
-
-Instead, they should refer to:
-
-ProvenanceShield — Hardware‑Attested, Provenance‑Locked Execution for Human‑Rights Telemetry  
-<https://github.com/Borealiscodes/ProvenanceShield>
-
 ---
 
 7. Academic Citation
