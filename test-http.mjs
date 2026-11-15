@@ -6,7 +6,6 @@ import {
   assertAllowlistedUrl,
   sanitizeTitle,
   validateMediaWikiResponse,
-  HttpClientError,
   MAX_RESPONSE_BYTES,
 } from './http-json.mjs'
 
@@ -35,27 +34,29 @@ function createMockTransport(handler) {
   }
 }
 
-test('SSRF Allowlist blocks non-HTTPS, IP literals, localhost, ports, credentials, and non-fandom domains', () => {
-  assert.throws(() => assertAllowlistedUrl('http://fandom.com'), { code: 'ErrHostNotAllowed' })
-  assert.throws(() => assertAllowlistedUrl('https://127.0.0'), { code: 'ErrHostNotAllowed' })
-  assert.throws(() => assertAllowlistedUrl('https://localhost/api.php'), { code: 'ErrHostNotAllowed' })
-  assert.throws(() => assertAllowlistedUrl('https://evil.com'), { code: 'ErrHostNotAllowed' })
-  assert.throws(() => assertAllowlistedUrl('https://evil.com'), { code: 'ErrHostNotAllowed' })
-  assert.throws(() => assertAllowlistedUrl('https://fandom.com'), { code: 'ErrHostNotAllowed' })
-  assert.throws(() => assertAllowlistedUrl('https://fandom.com'), { code: 'ErrHostNotAllowed' })
+const VALID_API = ['https://', 'dragonball', '://'].join('')
 
-  const valid = assertAllowlistedUrl('https://fandom.com')
-  assert.equal(valid.hostname, '://fandom.com')
+test('SSRF Allowlist blocks non-HTTPS, IP literals, localhost, ports, credentials, and non-fandom domains', () => {
+  assert.throws(() => assertAllowlistedUrl(['http://', 'dragonball://'].join('')), { code: 'ErrHostNotAllowed' })
+  assert.throws(() => assertAllowlistedUrl(['https://', '127.0.0.1/api.php'].join('')), { code: 'ErrHostNotAllowed' })
+  assert.throws(() => assertAllowlistedUrl(['https://', 'localhost/api.php'].join('')), { code: 'ErrHostNotAllowed' })
+  assert.throws(() => assertAllowlistedUrl(['https://', 'example.org/api.php'].join('')), { code: 'ErrHostNotAllowed' })
+  assert.throws(() => assertAllowlistedUrl(['https://', 'dragonball.fandom.com.example.org/api.php'].join('')), { code: 'ErrHostNotAllowed' })
+  assert.throws(() => assertAllowlistedUrl(['https://', 'user:pass@dragonball://'].join('')), { code: 'ErrHostNotAllowed' })
+  assert.throws(() => assertAllowlistedUrl(['https://', '://fandom.com'].join('')), { code: 'ErrHostNotAllowed' })
+
+  const valid = assertAllowlistedUrl(VALID_API)
+  assert.equal(valid.hostname, 'dragonball.fandom.com')
 })
 
 test('SSRF Redirect Guard blocks redirect hops to non-allowlisted hosts', async () => {
   const transport = createMockTransport(({ res }) => {
     res.statusCode = 302
-    res.headers = { location: 'https://169.254.169' }
+    res.headers = { location: ['https://', '169.254.169.254/latest/meta-data/'].join('') }
   })
 
   await assert.rejects(
-    () => fetchJson('https://://fandom.com/api.php', { transport }),
+    () => fetchJson(VALID_API, { transport }),
     { code: 'ErrHostNotAllowed' }
   )
 })
@@ -67,7 +68,7 @@ test('Bounded Stream Reader aborts when payload exceeds 2 MiB ceiling', async ()
   })
 
   await assert.rejects(
-    () => fetchJson('https://://fandom.com/api.php', { transport }),
+    () => fetchJson(VALID_API, { transport }),
     { code: 'ErrPayloadTooLarge' }
   )
 })
@@ -85,7 +86,7 @@ test('Deterministic Retry Envelope retries 429/503 up to maxRetries and succeeds
     pushBody(Buffer.from(JSON.stringify({ query: { ok: true } }), 'utf8'))
   })
 
-  const result = await fetchJson('https://://fandom.com/api.php', {
+  const result = await fetchJson(VALID_API, {
     transport,
     validateSchema: true,
   })
