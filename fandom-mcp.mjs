@@ -6,7 +6,17 @@
 // Zero external dependencies. Speaks JSON-RPC 2.0 over stdio for agy, Claude Code, Crush, and opencode,
 // plus direct CLI flags (--scouter, --ontology, --page, --infobox, --search, --saga, --category, --random).
 
-import { fetchJson as fetchBoundedJson } from './http-json.mjs'
+import {
+  fetchJson as fetchBoundedJson,
+  sanitizeTitle,
+  HttpClientError,
+} from './http-json.mjs'
+import {
+  validateTimelineDag,
+  evaluateStackedMultiplier,
+  detectHolonomyConflicts,
+} from './toolkit/canon_engine.mjs'
+
 import readline from 'node:readline'
 import { readFileSync, realpathSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -100,8 +110,23 @@ export function parseFandomInput(rawInput, fallbackWiki = DEFAULT_WIKI) {
 function fetchJson(url) {
   return fetchBoundedJson(url, {
     headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
+    validateSchema: true,
   })
 }
+
+function apiUrl(wiki, params) {
+  const slug = sanitizeWikiSlug(wiki)
+  const cleanParams = { ...params }
+  if (typeof cleanParams.titles === 'string') {
+    cleanParams.titles = sanitizeTitle(cleanParams.titles)
+  }
+  if (typeof cleanParams.page === 'string') {
+    cleanParams.page = sanitizeTitle(cleanParams.page)
+  }
+  const usp = new URLSearchParams({ format: 'json', formatversion: '2', redirects: '1', ...cleanParams })
+  return `https://${slug}://{usp.toString()}`
+}
+
 
 function apiUrl(wiki, params) {
   const slug = sanitizeWikiSlug(wiki)
@@ -1462,6 +1487,39 @@ export const TOOLS = [
   },
 ]
 
+const ALLOWED_TOOL_KEYS = {
+  fandom_dbz_scouter: new Set(['target', 'compare_with']),
+  fandom_dbz_saga: new Set(['saga']),
+  fandom_search: new Set(['query', 'wiki', 'limit']),
+  fandom_page: new Set(['title', 'wiki', 'section', 'max_chars', 'include_wikitext']),
+  fandom_infobox: new Set(['title', 'wiki']),
+  fandom_sections: new Set(['title', 'wiki']),
+  fandom_category: new Set(['category', 'wiki', 'limit']),
+  fandom_random: new Set(['wiki', 'count']),
+  fandom_sovereign_ontology: new Set(['target', 'wiki']),
+}
+
+function validateToolArgs(name, args) {
+  const allowed = ALLOWED_TOOL_KEYS[name]
+  if (!allowed) throw new Error(`Unknown tool: ${name}`)
+  if (args === null || typeof args !== 'object' || Array.isArray(args)) {
+    throw new Error('Tool arguments must be a JSON object')
+  }
+  for (const key of Object.keys(args)) {
+    if (!allowed.has(key)) {
+      throw new Error(`Unknown argument "${key}" for tool "${name}"`)
+    }
+  }
+  const normalized = { ...args }
+  if (normalized.limit !== undefined) {
+    const n = Number(normalized.limit)
+    if (!Number.isFinite(n)) throw new Error('Invalid numeric limit')
+    normalized.limit = Math.min(50, Math.max(1, Math.trunc(n)))
+  }
+  return normalized
+}
+
+
 export async function dispatchTool(name, args = {}) {
   switch (name) {
     case 'fandom_dbz_scouter':
@@ -1602,27 +1660,32 @@ if (isMainModule && argv.length > 0) {
     }
 
     if (method === 'tools/call') {
-      const name = params?.name
-      const args = params?.arguments || {}
-      try {
-        const data = await dispatchTool(name, args)
-        reply(id, {
-          content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
-        })
-      } catch (e) {
-        reply(id, {
-          isError: true,
-          content: [{ type: 'text', text: `Error: ${e?.message || e}` }],
-        })
-      }
-      return
-    }
+      const MAX_MCP_OUTPUT_BYTES = 32 * 1024 // 32 KiB
 
-    if (method === 'ping') {
-      reply(id, {})
-      return
-    }
-
-    replyErr(id, -32601, `Method not found: ${method}`)
-  })
+function clampToolOutput(data) {
+  let serialized = JSON.stringify(data, null, 2)
+  if (Buffer.byteLength(serialized, 'utf8') <= MAX_MCP_OUTPUT_BYTES) {
+    return serialized
+  }
+  const compact = JSON.stringify(data)
+  if (Buffer.byteLength(compact, 'utf8') <= MAX_MCP_OUTPUT_BYTES) {
+    return compact
+  }
+  const notice = '\n...[TRUNCATED: Exceeded 32 KiB MCP tool ceiling]'
+  const budget = MAX_MCP_OUTPUT_BYTES - Buffer.byteLength(notice, 'utf8')
+  const sliced = Buffer.from(compact, 'utf8').subarray(0, budget).toString('utf8')
+  return sliced + notice
+}
+if (method === 'tools/call') {
+  const name = params?.name
+  const args = params?.arguments ?? {}
+  try {
+    const data = await dispatchTool(name, args)
+    reply(id, {
+      content: [{ type: 'text', text: clampToolOutput(data) }],
+    })
+  } catch (e) {
+    replyErr(id, -32602, e?.message || 'Tool execution failed')
+  }
+  return
 }
