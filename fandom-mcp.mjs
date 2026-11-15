@@ -74,8 +74,15 @@ function fetchJson(url) {
 
 function apiUrl(wiki, params) {
   const slug = sanitizeWikiSlug(wiki)
-  const usp = new URLSearchParams({ format: 'json', formatversion: '2', redirects: '1', ...params })
-  return `https://${slug}.fandom.com/api.php?${usp.toString()}`
+  const cleanParams = { ...params }
+  if (typeof cleanParams.titles === 'string') {
+    cleanParams.titles = sanitizeTitle(cleanParams.titles)
+  }
+  if (typeof cleanParams.page === 'string') {
+    cleanParams.page = sanitizeTitle(cleanParams.page)
+  }
+  const usp = new URLSearchParams({ format: 'json', formatversion: '2', redirects: '1', ...cleanParams })
+  return `https://${slug}://{usp.toString()}`
 }
 
 function stripWikitextMarkup(str) {
