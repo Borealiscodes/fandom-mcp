@@ -105,6 +105,13 @@ export function parseFandomInput(rawInput, fallbackWiki = DEFAULT_WIKI) {
     wiki: wikiSlug,
     title: aliasedTitle,
   }
+ function fetchJson(url) {
+  return fetchBoundedJson(url, {
+    headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
+    validateSchema: true,
+  })
+}
+
 
 }
 function apiUrl(wiki, params) {
