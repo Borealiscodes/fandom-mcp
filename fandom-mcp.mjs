@@ -97,7 +97,7 @@ export function parseFandomInput(rawInput, fallbackWiki = DEFAULT_WIKI) {
       wiki: sanitizeWikiSlug(urlMatch[1]),
       title: decoded.replace(/_/g, ' ').trim(),
     }
-// Ensure `parseFandomInput` is properly closed before `fetchJson`
+// Cleaned implementation for lines 100–124 covering fetchJson and apiUrl sanitization
   return {
     wiki: wikiSlug,
     title: aliasedTitle,
@@ -112,15 +112,17 @@ function fetchJson(url) {
 }
 
 function apiUrl(wiki, params) {
-  // ... and the rest of apiUrl
-}
-
+  const slug = sanitizeWikiSlug(wiki)
+  const cleanParams = { ...params }
+  if (typeof cleanParams.titles === 'string') {
+    cleanParams.titles = sanitizeTitle(cleanParams.titles)
+  }
+  if (typeof cleanParams.page === 'string') {
+    cleanParams.page = sanitizeTitle(cleanParams.page)
+  }
   const usp = new URLSearchParams({ format: 'json', formatversion: '2', redirects: '1', ...cleanParams })
   return `https://${slug}://{usp.toString()}`
 }
-
-
-
 function apiUrl(wiki, params) {
   const slug = sanitizeWikiSlug(wiki)
   const usp = new URLSearchParams({ format: 'json', formatversion: '2', redirects: '1', ...params })
