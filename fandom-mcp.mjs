@@ -1516,7 +1516,8 @@ function validateToolArgs(name, args) {
 }
 
 
-export async function dispatchTool(name, args = {}) {
+export async function dispatchTool(name, rawArgs = {}) {
+  const args = validateToolArgs(name, rawArgs)
   switch (name) {
     case 'fandom_dbz_scouter':
       return fandomDbzScouter(args)
@@ -1611,14 +1612,80 @@ if (isMainModule && argv.length > 0) {
     process.exit(1)
   })
 } else if (isMainModule) {
-  // Stdio JSON-RPC 2.0 MCP Server Loop
+  const MAX_MCP_OUTPUT_BYTES = 32 * 1024 // 32 KiB
+
+  function clampToolOutput(data) {
+    const serialized = JSON.stringify(data, null, 2)
+    if (Buffer.byteLength(serialized, 'utf8') <= MAX_MCP_OUTPUT_BYTES) {
+      return serialized
+    }
+    const compact = JSON.stringify(data)
+    if (Buffer.byteLength(compact, 'utf8') <= MAX_MCP_OUTPUT_BYTES) {
+      return compact
+    }
+    const notice = '\n...[TRUNCATED: Exceeded 32 KiB MCP tool ceiling]'
+    const budget = MAX_MCP_OUTPUT_BYTES - Buffer.byteLength(notice, 'utf8')
+    const sliced = Buffer.from(compact, 'utf8').subarray(0, budget).toString('utf8')
+    return sliced + notice
+  }
+
   function reply(id, result) {
     process.stdout.write(JSON.stringify({ jsonrpc: '2.0', id, result }) + '\n')
   }
-
   function replyErr(id, code, message) {
     process.stdout.write(JSON.stringify({ jsonrpc: '2.0', id, error: { code, message } }) + '\n')
   }
+
+  const rl = readline.createInterface({ input: process.stdin, terminal: false })
+  rl.on('line', async (line) => {
+    const trimmed = line.trim()
+    if (!trimmed) return
+    let msg
+    try {
+      msg = JSON.parse(trimmed)
+    } catch {
+      replyErr(null, -32700, 'Parse error')
+      return
+    }
+    if (msg === null || typeof msg !== 'object' || Array.isArray(msg)) {
+      replyErr(null, -32600, 'Invalid Request')
+      return
+    }
+    const { id, method, params } = msg
+    if (id === undefined || id === null) return
+
+    if (method === 'initialize') {
+      reply(id, {
+        protocolVersion: params?.protocolVersion || '2024-11-05',
+        capabilities: { tools: {} },
+        serverInfo: {
+          name: 'fandom-mcp',
+          version: VERSION,
+        },
+      })
+      return
+    }
+    if (method === 'tools/list') {
+      reply(id, { tools: TOOLS })
+      return
+    }
+    if (method === 'tools/call') {
+      const name = params?.name
+      const args = params?.arguments ?? {}
+      try {
+        const data = await dispatchTool(name, args)
+        reply(id, {
+          content: [{ type: 'text', text: clampToolOutput(data) }],
+        })
+      } catch (e) {
+        replyErr(id, -32602, e?.message || 'Tool execution failed')
+      }
+      return
+    }
+    replyErr(id, -32601, `Method not found: ${method}`)
+  })
+}
+
 
   const rl = readline.createInterface({ input: process.stdin, terminal: false })
   rl.on('line', async (line) => {
