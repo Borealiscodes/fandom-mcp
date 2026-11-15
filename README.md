@@ -3,9 +3,9 @@
 Dragon Ball Universe Coherence Engine — Ontology, Clustering, and Multiversal Runtime Physics
 
 > ### 🚨 SAVAGE DISCLAIMER: AI-ASSISTED VANDALISM & HIATUS NOTICE
-> **Full transparency before you `npm test`:** GitHub Copilot had an absolute stroke refactoring this repository. While it successfully built some genuinely great zero-dependency math (`toolkit/canon_engine.mjs`), an HTML wiki parser (`toolkit/wiki_parser.mjs` + `test-parser.mjs`), and a SHA-256 provenance envelope (`toolkit/provenance.mjs`), it also **deleted `://` out of `apiUrl()`** (turning live wiki queries into `https://dragonball://{usp.toString()}`), **did the exact same URL-mangling trick inside `provenance.mjs`** (`https://${slug}://{encodedTitle}`), quietly amputated 87% of the canonical Dragon Ball saga/power-level tables, and left the 432 Hz cosmic ontology furniture sitting in the main file—before writing a glowing `GAP_AUDIT.md` roasting its own bugs.
+> **Full transparency before you `npm test`:** The core zero-dependency math (`toolkit/canon_engine.mjs`), rendered HTML wiki parser (`toolkit/wiki_parser.mjs` + `test-parser.mjs`), SHA-256 provenance envelope (`toolkit/provenance.mjs`), and SSRF-hardened client (`http-json.mjs`) were built cleanly with Gemini—and they actually work. Then GitHub Copilot touched the repo and had an absolute stroke refactoring it: Copilot **deleted `://` out of `apiUrl()`** (turning live wiki queries into `https://dragonball://{usp.toString()}`), **did the exact same URL-mangling trick inside `provenance.mjs`** (`https://${slug}://{encodedTitle}`), quietly amputated 87% of the canonical Dragon Ball saga/power-level tables, and left the 432 Hz cosmic ontology furniture sitting in the main file—before writing a glowing `GAP_AUDIT.md` roasting its own bugs.
 >
-> The new parser, provenance toolkit, and canon audit engine are all here in the tree if you want to salvage or wire them up, **but I give up lol for now**. PRs welcome if you want to finish cleaning up after the robot.
+> All the new parser, provenance, and canon audit modules are sitting right here in the tree ready to wire up, **but I give up lol for now**. PRs welcome if you want to finish cleaning up after Copilot.
 
 The **fandom‑mcp** project is a zero-dependency Node.js ESM open-source runtime engine designed to stabilize fictional universe canon (focusing on Dragon Ball and Fandom wikis) using deterministic graph invariants, exact rational arithmetic, and the A0–A10 altitude stack.
 
@@ -34,7 +34,7 @@ Dragon Ball’s nonlinear, retconned, and multiversal canon cannot be resolved b
 ## 🏗 Current State of the Codebase
 
 ### Operational Core & Modules
-- **MCP Server & CLI (`fandom-mcp.mjs`):** JSON-RPC 2.0 over stdio and direct CLI tool inspection *(requires `apiUrl()` hotfix before live Fandom fetches)*.
+- **MCP Server & CLI (`fandom-mcp.mjs`):** JSON-RPC 2.0 over stdio and direct CLI tool inspection *(requires `apiUrl()` hotfix after Copilot's rewrite before live Fandom fetches)*.
 - **SSRF-Hardened Client (`http-json.mjs`):** Enforces HTTPS-only `*.fandom.com` allowlists, 2 MiB payloads, 8000ms timeouts, jitter-free retries, and title sanitization.
 - **Canon & Saga DAG Engine (`toolkit/canon_engine.mjs`):**
   - **Cycle-Checked Timeline DAG:** Topological sort with DFS back-edge detection (`ErrTimelineCycle`).
@@ -42,7 +42,7 @@ Dragon Ball’s nonlinear, retconned, and multiversal canon cannot be resolved b
   - **Discrete Holonomy Detector:** Flags cross-source attribute conflicts (`HolonomyConflict`).
   - **Deterministic Jaccard Clustering:** Integer-scaled similarity with tie-breaking.
 - **Rendered HTML Wiki Parser (`toolkit/wiki_parser.mjs` & `test-parser.mjs`):** Decodes named/decimal/hex HTML entities safely, strips scripts/styles/citation superscripts, parses `<aside class="portable-infobox">` blocks with normalized field lookups, and extracts clean pull-quotes and Markdown lead prose.
-- **Berne Provenance Toolkit (`toolkit/provenance.mjs`):** Computes deterministic `SHA-256` content digests and attaches `berne-provenance-v2.0` CC-BY-SA-3.0 attribution envelopes to payloads *(note: `canonicalUrl` currently shares the `https://${slug}://{encodedTitle}` template typo)*.
+- **Berne Provenance Toolkit (`toolkit/provenance.mjs`):** Computes deterministic `SHA-256` content digests and attaches `berne-provenance-v2.0` CC-BY-SA-3.0 attribution envelopes to payloads *(note: `canonicalUrl` currently shares Copilot's `https://${slug}://{encodedTitle}` template typo)*.
 - **Protocol Hardening:** Strict key allowlists (`ALLOWED_TOOL_KEYS`), limit clamping, and a 32 KiB output ceiling.
 
 ### Architecture Overview
