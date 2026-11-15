@@ -71,3 +71,29 @@ test('Phase 3 MCP dispatchTool rejects unknown tool arguments at boundary', asyn
     /Unknown argument "evil_override"/
   )
 })
+test('Phase 2/3 MCP dispatchTool executes fandom_canon_audit end-to-end', async () => {
+  const result = await dispatchTool('fandom_canon_audit', {
+    dag_nodes: ['DB', 'DBZ', 'DBS'],
+    dag_edges: [
+      ['DB', 'DBZ'],
+      ['DBZ', 'DBS'],
+    ],
+    base_power: '10',
+    multipliers: ['ozaru', 'kaioken_x4'],
+    observations: [
+      { entity: 'Bardock', attribute: 'PowerLevel', era: 'Saiyan', source: 'TV Special', value: '10000' },
+      { entity: 'Bardock', attribute: 'PowerLevel', era: 'Saiyan', source: 'DBS: Broly', value: 'Unspecified' },
+    ],
+    target_tokens: ['saiyan', 'earth'],
+    candidates: [
+      { id: 'piccolo', tokens: ['namekian', 'earth'] },
+      { id: 'goku', tokens: ['saiyan', 'earth'] },
+    ],
+  })
+
+  assert.equal(result.ok, true)
+  assert.deepEqual(result.timeline_dag.topological_order, ['DB', 'DBZ', 'DBS'])
+  assert.equal(result.power_multiplier.formatted_power, '400')
+  assert.equal(result.holonomy_audit.conflict_count, 1)
+  assert.equal(result.entity_clustering[0].id, 'goku')
+})
