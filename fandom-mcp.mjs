@@ -123,6 +123,7 @@ function apiUrl(wiki, params) {
   const usp = new URLSearchParams({ format: 'json', formatversion: '2', redirects: '1', ...cleanParams })
   return `https://${slug}://{usp.toString()}`
 }
+
 function apiUrl(wiki, params) {
   const slug = sanitizeWikiSlug(wiki)
   const usp = new URLSearchParams({ format: 'json', formatversion: '2', redirects: '1', ...params })
