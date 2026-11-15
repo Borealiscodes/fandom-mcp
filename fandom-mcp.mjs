@@ -1419,7 +1419,39 @@ export const TOOLS = [
       },
       required: ['title'],
     },
-  },
+  },function fandomCanonAudit({
+  dag_nodes,
+  dag_edges,
+  base_power,
+  multipliers,
+  observations,
+  target_tokens,
+  candidates,
+}) {
+  const report = {
+    ok: true,
+    engine: 'NDH-Meta-Systems Canon & Saga Audit Engine (Phase 2)',
+  }
+
+  if (Array.isArray(dag_nodes) || Array.isArray(dag_edges)) {
+    report.timeline_dag = validateTimelineDag(dag_nodes || [], dag_edges || [])
+  }
+
+  if (base_power !== undefined && base_power !== null) {
+    report.power_multiplier = evaluateStackedMultiplier(base_power, multipliers || [])
+  }
+
+  if (Array.isArray(observations)) {
+    report.holonomy_audit = detectHolonomyConflicts(observations)
+  }
+
+  if (Array.isArray(target_tokens) && Array.isArray(candidates)) {
+    report.entity_clustering = rankRelatedEntities(target_tokens, candidates)
+  }
+
+  return report
+}
+
   {
     name: 'fandom_category',
     description:
