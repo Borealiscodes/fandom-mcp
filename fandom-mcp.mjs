@@ -105,15 +105,8 @@ export function parseFandomInput(rawInput, fallbackWiki = DEFAULT_WIKI) {
     wiki: wikiSlug,
     title: aliasedTitle,
   }
-}
 
-function fetchJson(url) {
-  return fetchBoundedJson(url, {
-    headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
-    validateSchema: true,
-  })
 }
-
 function apiUrl(wiki, params) {
   const slug = sanitizeWikiSlug(wiki)
   const cleanParams = { ...params }
@@ -126,6 +119,7 @@ function apiUrl(wiki, params) {
   const usp = new URLSearchParams({ format: 'json', formatversion: '2', redirects: '1', ...cleanParams })
   return `https://${slug}://{usp.toString()}`
 }
+
 
 
 function apiUrl(wiki, params) {
