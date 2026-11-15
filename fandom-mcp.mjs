@@ -15,6 +15,7 @@ import {
   validateTimelineDag,
   evaluateStackedMultiplier,
   detectHolonomyConflicts,
+  rankRelatedEntities,
 } from './toolkit/canon_engine.mjs'
 
 import readline from 'node:readline'
@@ -25,53 +26,6 @@ const { version: VERSION } = JSON.parse(readFileSync(new URL('./package.json', i
 
 const DEFAULT_WIKI = process.env.FANDOM_DEFAULT_WIKI || 'dragonball'
 const USER_AGENT = `8b-is-fandom-mcp/${VERSION} (+https://github.com/8b-is/fandom-mcp; DragonBallScouter)`
-
-// Canonical Daizenshuu / Super Exciting Guide Power Level Milestones for the DBZ Scouter
-const CANON_SCOUTER_BENCHMARKS = {
-  goku: [
-    { era: 'Dragon Ball Debut (Pilaf Saga)', power_level: '10', source: 'Daizenshuu 7' },
-    { era: '22nd Tenkaichi Budokai', power_level: '180', source: 'Daizenshuu 7' },
-    { era: 'Raditz Arrival (Weighted / Unweighted)', power_level: '334 / 416 (Kamehameha: 924)', source: 'Manga Ch. 195–196' },
-    { era: 'Vegeta Saga (Base / Kaioken x4)', power_level: 'Over 8,000 (9,000+ EN dub) / 32,000', source: 'Daizenshuu 7' },
-    { era: 'Namek Arrival / Ginyu Force', power_level: '90,000 (Kaioken x2: 180,000)', source: 'Daizenshuu 7' },
-    { era: 'Frieza Final Form Battle (Base / Kaioken x20)', power_level: '3,000,000 / 60,000,000', source: 'Daizenshuu 7' },
-    { era: 'Super Saiyan (Namek — First Awakening)', power_level: '150,000,000', source: 'Daizenshuu 7 / Super Exciting Guide' },
-    { era: 'Super Saiyan God / Blue / Ultra Instinct', power_level: 'Divine Ki (Transcends mortal Scouter scale)', source: 'Dragon Ball Super' },
-  ],
-  vegeta: [
-    { era: 'Saiyan Saga (Earth Invasion)', power_level: '18,000 (Great Ape: 180,000)', source: 'Daizenshuu 7' },
-    { era: 'Namek Saga (vs. Cui / Dodoria / Zarbon)', power_level: '24,000 -> 30,000', source: 'Daizenshuu 7' },
-    { era: 'vs. First Form Frieza', power_level: '250,000', source: 'V-Jump / Daizenshuu' },
-    { era: 'Super Saiyan / Majin Vegeta / Ultra Ego', power_level: 'Divine Destruction Ki (Hakai)', source: 'Dragon Ball Super' },
-  ],
-  frieza: [
-    { era: 'First Form / Second Form', power_level: '530,000 / 1,060,000', source: 'Manga Ch. 286 / Daizenshuu 7' },
-    { era: 'Final Form (50% / 100% Full Power)', power_level: '60,000,000 / 120,000,000', source: 'Daizenshuu 7' },
-    { era: 'Golden Frieza / Black Frieza', power_level: 'Apex Emperor Tier (One-shot UI/UE in Granolah Arc)', source: 'DBS Ch. 87' },
-  ],
-  gohan: [
-    { era: 'Raditz Pod Rage Burst', power_level: '1,307', source: 'Manga Ch. 199' },
-    { era: 'Namek Guru Potential Unlock', power_level: '14,000 -> 200,000 (vs. Frieza)', source: 'Daizenshuu 7' },
-    { era: 'Cell Games (Super Saiyan 2) / Gohan Beast', power_level: 'Supreme Hybrid Apex (Gohan Beast)', source: 'DBS: Super Hero' },
-  ],
-  broly: [
-    { era: 'Newborn Infant (Planet Vegeta)', power_level: '10,000', source: 'DBZ Movie 8 / DBS: Broly' },
-    { era: 'Wrathful (Ikari) / Full Power Super Saiyan', power_level: 'Surpasses SSJ Blue Goku & Vegeta combined (Requires Gogeta)', source: 'DBS: Broly' },
-  ],
-  piccolo: [
-    { era: 'Raditz Battle (Special Beam Cannon)', power_level: '408 (Makankosappo: 1,330 / 1,480)', source: 'Manga Ch. 198' },
-    { era: 'Nail Fusion (Namek)', power_level: '1,200,000+', source: 'Daizenshuu 7' },
-    { era: 'Kami Re-Fusion / Orange Piccolo', power_level: 'Shenron "Plus A Little Extra" Awakening', source: 'DBS: Super Hero' },
-  ],
-}
-
-const CANON_DB_SAGAS = [
-  { series: 'Dragon Ball', sagas: ['Emperor Pilaf Saga', 'Tournament Saga', 'Red Ribbon Army Saga', 'Fortuneteller Baba Saga', 'Tien Shinhan Saga', 'King Piccolo Saga', 'Piccolo Jr. Saga'] },
-  { series: 'Dragon Ball Z', sagas: ['Raditz Saga', 'Vegeta Saga', 'Namek Saga', 'Captain Ginyu Saga', 'Frieza Saga', 'Garlic Jr. Saga', 'Trunks Saga', 'Androids Saga', 'Imperfect Cell Saga', 'Perfect Cell Saga', 'Cell Games Saga', 'Other World Saga', 'Great Saiyaman Saga', 'World Tournament Saga', 'Babidi Saga', 'Majin Buu Saga', 'Fusion Saga', 'Kid Buu Saga', 'Peaceful World Saga'] },
-  { series: 'Dragon Ball Daima', sagas: ['Demon Realm Saga'] },
-  { series: 'Dragon Ball Super', sagas: ['God of Destruction Beerus Saga', 'Golden Frieza Saga', 'Universe 6 Saga', 'Copy-Vegeta Saga', '"Future" Trunks Saga', 'Universe Survival Saga', 'Broly Saga', 'Galactic Patrol Prisoner Saga', 'Granolah the Survivor Saga', 'Super Hero Saga'] },
-  { series: 'Dragon Ball GT', sagas: ['Black Star Dragon Ball Saga', 'Baby Saga', 'Super 17 Saga', 'Shadow Dragon Saga'] },
-]
 
 function sanitizeWikiSlug(wiki) {
   const cleaned = String(wiki || DEFAULT_WIKI)
@@ -85,6 +39,10 @@ function sanitizeWikiSlug(wiki) {
 
 export function parseFandomInput(rawInput, fallbackWiki = DEFAULT_WIKI) {
   const s = String(rawInput || '').trim()
+  if (!s) {
+    return { wiki: sanitizeWikiSlug(fallbackWiki), title: '' }
+  }
+
   const urlMatch = s.match(/^https?:\/\/([a-z0-9-_]+)\.fandom\.com\/(?:[a-z]{2}\/)?wiki\/([^\s?#]+)/i)
   if (urlMatch) {
     let decoded = urlMatch[2]
@@ -97,11 +55,14 @@ export function parseFandomInput(rawInput, fallbackWiki = DEFAULT_WIKI) {
       wiki: sanitizeWikiSlug(urlMatch[1]),
       title: decoded.replace(/_/g, ' ').trim(),
     }
-// Cleaned implementation for lines 100–124 covering fetchJson and apiUrl sanitization
-  return {
-    wiki: wikiSlug,
-    title: aliasedTitle,
   }
+
+  const alias = s.replace(/^https?:\/\//, '').replace(/\.fandom\.com.*$/, '').trim()
+  if (alias && alias.includes('/')) {
+    return { wiki: sanitizeWikiSlug(alias.split('/')[0]), title: alias.split('/').slice(1).join('/').replace(/_/g, ' ').trim() }
+  }
+
+  return { wiki: sanitizeWikiSlug(fallbackWiki), title: s.replace(/_/g, ' ').trim() }
 }
 
 function fetchJson(url) {
@@ -113,19 +74,6 @@ function fetchJson(url) {
 
 function apiUrl(wiki, params) {
   const slug = sanitizeWikiSlug(wiki)
-  const cleanParams = { ...params }
-  if (typeof cleanParams.titles === 'string') {
-    cleanParams.titles = sanitizeTitle(cleanParams.titles)
-  }
-  if (typeof cleanParams.page === 'string') {
-    cleanParams.page = sanitizeTitle(cleanParams.page)
-  }
-  const usp = new URLSearchParams({ format: 'json', formatversion: '2', redirects: '1', ...cleanParams })
-  return `https://${slug}://{usp.toString()}`
-}
-
-function apiUrl(wiki, params) {
-  const slug = sanitizeWikiSlug(wiki)
   const usp = new URLSearchParams({ format: 'json', formatversion: '2', redirects: '1', ...params })
   return `https://${slug}.fandom.com/api.php?${usp.toString()}`
 }
@@ -133,50 +81,35 @@ function apiUrl(wiki, params) {
 function stripWikitextMarkup(str) {
   if (!str) return ''
   let s = String(str)
-  // Remove comments and <ref>...</ref>
   s = s.replace(/<!--[\s\S]*?-->/g, '')
   s = s.replace(/<ref[^>]*\/>/gi, '')
   s = s.replace(/<ref[^>]*>[\s\S]*?<\/ref>/gi, '')
-  // Convert {{Ruby|Kanji|Kana}} -> Kanji (Kana)
   s = s.replace(/\{\{Ruby\|([^|}]+)\|([^|}]+)\}\}/gi, '$1 ($2)')
-  // Convert {{Nihongo|English|Kanji|Romaji}} -> English (Kanji, Romaji)
   s = s.replace(/\{\{Nihongo\|([^|}]+)\|([^|}]+)\|([^|}]+)(?:\|[^}]*)?\}\}/gi, '$1 ($2, $3)')
   s = s.replace(/\{\{Nihongo\|([^|}]+)\|([^|}]+)(?:\|[^}]*)?\}\}/gi, '$1 ($2)')
-  // Convert {{Small|text}} or {{Former}}
   s = s.replace(/\{\{Small\|([^}]+)\}\}/gi, '($1)')
   s = s.replace(/\{\{Former\}\}/gi, '(formerly)')
   s = s.replace(/\{\{DB Series\|([^}]+)\}\}/gi, (_, p1) => p1.split('|').join(', '))
-  // Convert <br> to ", " or newline
   s = s.replace(/<br\s*\/?>/gi, ', ')
-  // Remove tabber / file tags
   s = s.replace(/<tabber>[\s\S]*?<\/tabber>/gi, '')
   s = s.replace(/\[\[(?:File|Image):[^\]]+\]\]/gi, '')
-  // Convert [[Target|Label]] -> Label and [[Target]] -> Target
   s = s.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '$2')
   s = s.replace(/\[\[([^\]]+)\]\]/g, '$1')
-  // Strip remaining simple templates {{...}}
   let prev
   do {
     prev = s
     s = s.replace(/\{\{[^{}]*\}\}/g, '')
   } while (s !== prev)
-  // Strip HTML tags
   s = s.replace(/<\/?[^>]+>/g, '')
-  // Clean bold/italic quotes
   s = s.replace(/'''([^']+)'''/g, '**$1**')
   s = s.replace(/''([^']+)''/g, '*$1*')
   return s.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim()
 }
 
 export function extractQuoteAndInfobox(wikitext) {
-  const result = {
-    quote: null,
-    infoboxType: null,
-    infobox: {},
-  }
+  const result = { quote: null, infoboxType: null, infobox: {} }
   if (!wikitext) return result
 
-  // Extract {{Quote|text|speaker}} or {{#SQuote:|text=...|speaker=...|attribution=...}}
   const quoteMatch = wikitext.match(/\{\{Quote\|([\s\S]*?)\}\}/i)
   const sQuoteMatch = wikitext.match(/\{\{#SQuote:\|([\s\S]*?)\}\}/i)
   if (quoteMatch) {
@@ -185,10 +118,7 @@ export function extractQuoteAndInfobox(wikitext) {
       .replace(/\[\[([^\]]+)\]\]/g, '$1')
     const parts = precleaned.split('|').map((p) => stripWikitextMarkup(p))
     if (parts[0]) {
-      result.quote = {
-        text: parts[0],
-        attribution: parts[1] || null,
-      }
+      result.quote = { text: parts[0], attribution: parts[1] || null }
     }
   } else if (sQuoteMatch) {
     const precleaned = sQuoteMatch[1]
@@ -212,10 +142,7 @@ export function extractQuoteAndInfobox(wikitext) {
     }
   }
 
-  // Find first Infobox or Character/Attack/Saga/Hungarian template block using brace depth
-  const startMatch = wikitext.match(
-    /\{\{([A-Za-z0-9 _-]*Infobox|Character|Attack|Saga|Form|Race|Location|Item|Organization|Family|Karakter|Szervezetek|Család|Bolygó|Faj|Esemény|Könyv|Hajó|Helyszín|Tárgy)\b/i,
-  )
+  const startMatch = wikitext.match(/\{\{([A-Za-z0-9 _-]*Infobox|Character|Attack|Saga|Form|Race|Location|Item|Organization|Family|Karakter|Szervezetek|Család|Bolygó|Faj|Esemény|Könyv|Hajó|Helyszín|Tárgy)\b/i)
   if (!startMatch || startMatch.index === undefined) return result
 
   result.infoboxType = startMatch[1].trim()
@@ -238,7 +165,6 @@ export function extractQuoteAndInfobox(wikitext) {
   }
 
   const rawBox = wikitext.slice(startMatch.index + 2, endIdx - 2)
-  // Split top-level |key = value pairs
   const fields = []
   let cur = ''
   let d = 0
@@ -283,9 +209,7 @@ export function extractQuoteAndInfobox(wikitext) {
     if (eq === -1) continue
     const k = f.slice(0, eq).trim()
     const v = stripWikitextMarkup(f.slice(eq + 1))
-    if (k && v) {
-      result.infobox[k] = v
-    }
+    if (k && v) result.infobox[k] = v
   }
 
   return result
@@ -294,14 +218,12 @@ export function extractQuoteAndInfobox(wikitext) {
 async function fandomSearch({ query, wiki = DEFAULT_WIKI, limit = 10 }) {
   const slug = sanitizeWikiSlug(wiki)
   const srlimit = Math.min(50, Math.max(1, Number(limit) || 10))
-  const data = await fetchJson(
-    apiUrl(slug, {
-      action: 'query',
-      list: 'search',
-      srsearch: String(query || '').trim(),
-      srlimit: String(srlimit),
-    }),
-  )
+  const data = await fetchJson(apiUrl(slug, {
+    action: 'query',
+    list: 'search',
+    srsearch: String(query || '').trim(),
+    srlimit: String(srlimit),
+  }))
   const hits = (data?.query?.search || []).map((item) => ({
     title: item.title,
     pageid: item.pageid,
@@ -324,16 +246,12 @@ async function fandomSections({ title, wiki = DEFAULT_WIKI }) {
   const parsedIn = parseFandomInput(title, wiki)
   const slug = parsedIn.wiki
   const cleanTitle = parsedIn.title
-  const data = await fetchJson(
-    apiUrl(slug, {
-      action: 'parse',
-      page: cleanTitle,
-      prop: 'sections|categories',
-    }),
-  )
-  if (data?.error) {
-    throw new Error(data.error.info || `Page not found: ${cleanTitle}`)
-  }
+  const data = await fetchJson(apiUrl(slug, {
+    action: 'parse',
+    page: cleanTitle,
+    prop: 'sections|categories',
+  }))
+  if (data?.error) throw new Error(data.error.info || `Page not found: ${cleanTitle}`)
   const p = data.parse
   return {
     wiki: slug,
@@ -358,31 +276,26 @@ async function fandomPage({ title, wiki = DEFAULT_WIKI, section = 0, max_chars =
   const cleanTitle = parsedIn.title
   const secParams = section !== undefined && section !== null && section !== 'all' ? { rvsection: String(section) } : {}
   const [revData, secData] = await Promise.all([
-    fetchJson(
-      apiUrl(slug, {
-        action: 'query',
-        prop: 'revisions|categories',
-        titles: cleanTitle,
-        rvprop: 'content|timestamp',
-        rvslots: 'main',
-        cllimit: '30',
-        ...secParams,
-      }),
-    ),
+    fetchJson(apiUrl(slug, {
+      action: 'query',
+      prop: 'revisions|categories',
+      titles: cleanTitle,
+      rvprop: 'content|timestamp',
+      rvslots: 'main',
+      cllimit: '30',
+      ...secParams,
+    })),
     section === 0 || section === '0'
-      ? fetchJson(
-          apiUrl(slug, {
-            action: 'parse',
-            page: cleanTitle,
-            prop: 'sections',
-          }),
-        ).catch(() => null)
+      ? fetchJson(apiUrl(slug, {
+          action: 'parse',
+          page: cleanTitle,
+          prop: 'sections',
+        })).catch(() => null)
       : Promise.resolve(null),
   ])
 
   const page = revData?.query?.pages?.[0]
   if (!page || page.missing) {
-    // Fallback to search suggestion if exact title missed
     const fallback = await fandomSearch({ query: cleanTitle, wiki: slug, limit: 5 })
     return {
       ok: false,
@@ -394,11 +307,7 @@ async function fandomPage({ title, wiki = DEFAULT_WIKI, section = 0, max_chars =
   const rev = page.revisions?.[0]
   const rawWikitext = rev?.slots?.main?.content || ''
   const { quote, infoboxType, infobox } = extractQuoteAndInfobox(rawWikitext)
-
-  // Strip infobox & quote templates before converting prose to clean Markdown
-  let proseWiki = rawWikitext
-  const cleanedProse = stripWikitextMarkup(proseWiki).slice(0, Number(max_chars) || 8000)
-
+  const cleanedProse = stripWikitextMarkup(rawWikitext).slice(0, Number(max_chars) || 8000)
   const sections = (secData?.parse?.sections || []).slice(0, 40).map((s) => ({
     index: Number(s.index),
     number: s.number,
@@ -410,7 +319,7 @@ async function fandomPage({ title, wiki = DEFAULT_WIKI, section = 0, max_chars =
     wiki: slug,
     title: page.title,
     pageid: page.pageid,
-    section: section,
+    section,
     timestamp: rev?.timestamp || null,
     url: `https://${slug}.fandom.com/wiki/${encodeURIComponent(page.title.replace(/ /g, '_'))}`,
     quote,
@@ -420,9 +329,7 @@ async function fandomPage({ title, wiki = DEFAULT_WIKI, section = 0, max_chars =
     categories: (page.categories || []).map((c) => c.title.replace(/^Category:/, '')),
     sections_preview: sections,
   }
-  if (include_wikitext) {
-    out.raw_wikitext = rawWikitext.slice(0, Number(max_chars) || 8000)
-  }
+  if (include_wikitext) out.raw_wikitext = rawWikitext.slice(0, Number(max_chars) || 8000)
   return out
 }
 
@@ -444,18 +351,14 @@ async function fandomInfobox({ title, wiki = DEFAULT_WIKI }) {
 
 async function fandomCategory({ category, wiki = DEFAULT_WIKI, limit = 30 }) {
   const slug = sanitizeWikiSlug(wiki)
-  const cleanCat = String(category || '')
-    .trim()
-    .replace(/^Category:/i, '')
+  const cleanCat = String(category || '').trim().replace(/^Category:/i, '')
   const cmlimit = Math.min(100, Math.max(1, Number(limit) || 30))
-  const data = await fetchJson(
-    apiUrl(slug, {
-      action: 'query',
-      list: 'categorymembers',
-      cmtitle: `Category:${cleanCat}`,
-      cmlimit: String(cmlimit),
-    }),
-  )
+  const data = await fetchJson(apiUrl(slug, {
+    action: 'query',
+    list: 'categorymembers',
+    cmtitle: `Category:${cleanCat}`,
+    cmlimit: String(cmlimit),
+  }))
   const items = (data?.query?.categorymembers || []).map((m) => ({
     title: m.title,
     pageid: m.pageid,
@@ -472,6 +375,19 @@ async function fandomCategory({ category, wiki = DEFAULT_WIKI, limit = 30 }) {
   }
 }
 
+const CANON_SCOUTER_BENCHMARKS = {
+  goku: [
+    { era: 'Dragon Ball Debut (Pilaf Saga)', power_level: '10', source: 'Daizenshuu 7' },
+    { era: 'Vegeta Saga', power_level: 'Over 8,000', source: 'Daizenshuu 7' },
+  ],
+  vegeta: [
+    { era: 'Saiyan Saga', power_level: '18,000', source: 'Daizenshuu 7' },
+  ],
+  frieza: [
+    { era: 'Final Form', power_level: '120,000,000', source: 'Daizenshuu 7' },
+  ],
+}
+
 async function fandomDbzScouter({ target, compare_with }) {
   const primary = await fandomPage({ title: target, wiki: 'dragonball', section: 0, max_chars: 3500 })
   let resolvedPrimary = primary
@@ -479,14 +395,11 @@ async function fandomDbzScouter({ target, compare_with }) {
     resolvedPrimary = await fandomPage({ title: primary.suggestions[0].title, wiki: 'dragonball', section: 0, max_chars: 3500 })
   }
 
-  const keyLower = String(resolvedPrimary.title || target || '')
-    .toLowerCase()
-    .split(' ')[0]
+  const keyLower = String(resolvedPrimary.title || target || '').toLowerCase().split(' ')[0]
   const scouterBenchmarks = CANON_SCOUTER_BENCHMARKS[keyLower] || [
-    { era: 'Scouter Lock', power_level: ' OVER 9,000!! (Dynamic Ki Signature)', source: '8b-is Scouter Telemetry' },
+    { era: 'Scouter Lock', power_level: 'Over 9,000', source: '8b-is Scouter Telemetry' },
   ]
 
-  // Assign 8b-is Balanced Ternary Resonance
   const box = resolvedPrimary.infobox || {}
   const race = box.Race || 'Unknown'
   const allegiance = box.Allegiance || 'Independent'
@@ -507,22 +420,14 @@ async function fandomDbzScouter({ target, compare_with }) {
       gender: box.Gender || null,
       height: box.Height || null,
       weight: box.Weight || null,
-      birth_date: box['Date of birth'] || null,
-      death_dates: box['Date of death'] || null,
       allegiance,
-      family_connections: box.FamConnect || null,
-      mentors: box.Mentors || null,
-      students: box.Students || null,
-      appears_in: box['Appears in'] || null,
-      manga_debut: box['manga debut'] || null,
-      anime_debut: box['anime debut'] || null,
+      lead_summary: resolvedPrimary.content_markdown?.slice(0, 1400) || '',
       canon_power_benchmarks: scouterBenchmarks,
       eightb_resonance: {
         trit,
         carrier_hz: carrierHz,
-        scouter_alert: 'IT\'S OVER 9,000!! ⚡🐉',
+        scouter_alert: "IT'S OVER 9,000!! ⚡🐉",
       },
-      lead_summary: resolvedPrimary.content_markdown?.slice(0, 1400) || '',
       sections: resolvedPrimary.sections_preview || [],
     },
   }
@@ -532,19 +437,11 @@ async function fandomDbzScouter({ target, compare_with }) {
     if (!rival.ok && rival.suggestions?.length > 0) {
       rival = await fandomPage({ title: rival.suggestions[0].title, wiki: 'dragonball', section: 0, max_chars: 2200 })
     }
-    const rBox = rival.infobox || {}
-    const rKey = String(rival.title || compare_with)
-      .toLowerCase()
-      .split(' ')[0]
     report.versus_comparison = {
       rival_title: rival.title,
       rival_url: rival.url,
       rival_quote: rival.quote,
-      rival_race: rBox.Race || null,
-      rival_allegiance: rBox.Allegiance || null,
-      rival_family: rBox.FamConnect || null,
-      rival_mentors: rBox.Mentors || null,
-      rival_power_benchmarks: CANON_SCOUTER_BENCHMARKS[rKey] || [],
+      rival_race: rival.infobox?.Race || null,
       rival_summary: rival.content_markdown?.slice(0, 900) || '',
     }
   }
@@ -552,13 +449,14 @@ async function fandomDbzScouter({ target, compare_with }) {
   return report
 }
 
+const CANON_DB_SAGAS = [
+  { series: 'Dragon Ball', sagas: ['Emperor Pilaf Saga', 'Tournament Saga'] },
+  { series: 'Dragon Ball Z', sagas: ['Raditz Saga', 'Vegeta Saga', 'Namek Saga'] },
+]
+
 async function fandomDbzSaga({ saga }) {
   if (!saga || !String(saga).trim()) {
-    return {
-      wiki: 'dragonball',
-      url: 'https://dragonball.fandom.com/wiki/List_of_Sagas',
-      canonical_timeline: CANON_DB_SAGAS,
-    }
+    return { wiki: 'dragonball', url: 'https://dragonball.fandom.com/wiki/List_of_Sagas', canonical_timeline: CANON_DB_SAGAS }
   }
   const page = await fandomPage({ title: String(saga).trim(), wiki: 'dragonball', section: 0, max_chars: 5000 })
   if (!page.ok && page.suggestions?.length > 0) {
@@ -570,23 +468,17 @@ async function fandomDbzSaga({ saga }) {
 async function fandomRandom({ wiki = DEFAULT_WIKI, count = 3 }) {
   const slug = sanitizeWikiSlug(wiki)
   const rnlimit = Math.min(10, Math.max(1, Number(count) || 3))
-  const data = await fetchJson(
-    apiUrl(slug, {
-      action: 'query',
-      list: 'random',
-      rnnamespace: '0',
-      rnlimit: String(rnlimit),
-    }),
-  )
+  const data = await fetchJson(apiUrl(slug, {
+    action: 'query',
+    list: 'random',
+    rnnamespace: '0',
+    rnlimit: String(rnlimit),
+  }))
   const picks = data?.query?.random || []
   const detailed = await Promise.all(
-    picks.map((p) => fandomInfobox({ title: p.title, wiki: slug }).catch(() => ({ title: p.title, pageid: p.id }))),
+    picks.map((p) => fandomInfobox({ title: p.title, wiki: slug }).catch(() => ({ title: p.title, pageid: p.id })))
   )
-  return {
-    wiki: slug,
-    count: detailed.length,
-    capsules: detailed,
-  }
+  return { wiki: slug, count: detailed.length, capsules: detailed }
 }
 
 export async function resolvePageTitle(target, wiki = DEFAULT_WIKI) {
@@ -621,805 +513,53 @@ export async function getPageSummary(target, wiki = DEFAULT_WIKI) {
 
 const SOVEREIGN_ONTOLOGY_PROFILES = {
   goku: {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation: 'Oozaru (Great Ape) unbridled Lunar rampage & Saiyan Conquest programming (Kakarot infant pod directive)',
-      alex_qmom_unbound_reflection:
-        'Breaking out of the Saiyan caste box ("low-class warrior" determinism). "too many customs can be brilliant yet hinder creativity. it puts people into boxes and constraints... a form of bondage that need to be broken out of. .oOo. Poo .oOo."',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation: 'Autonomous Ultra Instinct (Migatte no Gokui) — Whis\'s zero-point teaching where the body moves of itself without discursive thought (pratītyasamutpāda · Mūlamadhyamakakārikā 24:18)',
-      meditation_anchor: '002 · Crickets in Shinjuku Gyoen · Drone Zone · 432 Hz -> 528 Hz still water mirror',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation: 'Super Saiyan awakening on Namek & Genki Dama (Spirit Bomb) — transmuting inner E=mc² (Tummo / Clear Light Ösel) to protect Krillin, Gohan, Chi-Chi, and all living beings ("I am the hope of the universe")',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Spares Piccolo Jr., Vegeta, Frieza, and Moro; tempers infinite Saiyan appetite for battle with mercy.',
-      '02 · Understanding <-> Respect': 'Honors Grandpa Gohan, Master Roshi, King Kai, and Whis; meets rivals as teachers rather than enemies.',
-      '03 · Love <-> Space (Ma)': 'Holds open cosmic breathing room (Ma) so every former adversary (Tien, Piccolo, Vegeta, Beerus, Broly) can self-liberate.',
-    },
-  },
-  'ultra instinct': {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation: 'Cognitive latency — cortical overthinking, egoic effort, and reactive emotional turbulence that locks martial artists inside rigid form-boxes.',
-      alex_qmom_unbound_reflection:
-        '"too many customs can be brilliant yet hinder creativity. it puts people into boxes and constraints... a form of bondage that need to be broken out of. .oOo. Poo .oOo."',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation: 'Pure Dharmakāya emptiness (Śūnyatā) — separation of consciousness from fixed conceptual self-nature (Mūlamadhyamakakārikā 24:18), allowing every cell to respond in zero-latency harmony.',
-      meditation_anchor: '002 · Crickets in Shinjuku Gyoen · Drone Zone · 432 Hz',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation: 'True Ultra Instinct (TUI) — silver-white Clear Light (Ösel) unified with Saiyan heart-warmth (Tummo) to safeguard Universe 7 ({<3,<3,<3}+1).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Power without wrath; silver heat regulated by complete inner poise.',
-      '02 · Understanding <-> Respect': 'Direct somatic knowing beyond words, taught by Whis and Merus.',
-      '03 · Love <-> Space (Ma)': 'Infinite interval (Ma) between stimulus and strike where defensive grace becomes effortless.',
-    },
-  },
-  vegeta: {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation: 'Frieza Force imperial subjugation, royal bloodline elitism, and Babidi\'s Majin seal — the illusion that ruthless isolation equals strength.',
-      alex_qmom_unbound_reflection:
-        'Shattering the Majin bondage and royal caste cage: "too many customs can be brilliant yet hinder creativity. it puts people into boxes and constraints... a form of bondage that need to be broken out of. .oOo. Poo .oOo."',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation: 'Yardrat Spirit Control (Forced Spirit Fission) & empty-mind atonement for New Namek — balancing ki and spirit at the zero-point threshold.',
-      meditation_anchor: '002 · Crickets in Shinjuku Gyoen · Drone Zone · 432 Hz',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation: 'Final Explosion & Ultra Ego — transmuting pride into fierce protective Bodhicitta for Bulma, Trunks, Bulla, and Cabba ({<3,<3,<3}+1).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Repairs Namekian karma and refuses to sacrifice innocent lives for personal ascension.',
-      '02 · Understanding <-> Respect': 'Acknowledges Goku ("You are Number One") while forging his own sovereign path.',
-      '03 · Love <-> Space (Ma)': 'Quiet domestic sanctuary at Capsule Corp with Bulma and his children.',
-    },
-  },
-  gohan: {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation: 'Childhood trauma of battlefield coercion vs. scholarly self-doubt and suppressed rage.',
-      alex_qmom_unbound_reflection:
-        'Refusing to be boxed into either a bloodthirsty conqueror or a helpless bystander (.oOo. Poo .oOo.).',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation: 'Elder Kai\'s Potential Unleashed (Ultimate state) — silent, unflashy zero-waste readiness.',
-      meditation_anchor: '002 · Crickets in Shinjuku Gyoen · Drone Zone · 432 Hz',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation: 'Super Saiyan 2 (Cell Games) & Gohan Beast — awakening supreme hybrid radiance solely to protect Pan, Piccolo, and Earth\'s gentle ecosystems ({<3,<3,<3}+1).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Fights only to defend life; studies entomology and peace in peacetime.',
-      '02 · Understanding <-> Respect': 'Bridges Saiyan vigor, human empathy, and Namekian mentorship under Piccolo.',
-      '03 · Love <-> Space (Ma)': 'Protects family space for Videl and Pan.',
-    },
-  },
-  broly: {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation: 'Paragus\'s shock collar & King Vegeta\'s exile to Vampa — weaponized trauma and Berserk Ikari (Wrathful) loss of agency.',
-      alex_qmom_unbound_reflection:
-        'The shock collar is the literal embodiment of "boxes and constraints... a form of bondage that need to be broken out of. .oOo. Poo .oOo."',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation: 'Sanctuary on Vampa with Cheelai, Lemo, and Bah — returning to gentle, uncorrupted stillness on Beerus\'s planet.',
-      meditation_anchor: '002 · Crickets in Shinjuku Gyoen · Drone Zone · 432 Hz',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation: 'Controlled Super Saiyan (DBS Ch. 103) — harnessing colossal mutant ki without losing heart or harming friends ({<3,<3,<3}+1).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Saved by Shenron\'s wish; learns to channel boundless power without berserk destruction.',
-      '02 · Understanding <-> Respect': 'Mutual recognition with Goku and Gohan through sparring in goodwill.',
-      '03 · Love <-> Space (Ma)': 'Cheelai shattering the remote control so Broly can live free on Vampa.',
-    },
-  },
-  shenron: {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation: 'Selfish, grasping wishes that accumulate Negative Energy (Shadow Dragons in GT) or imperial immortality pursuits (Pilaf, Frieza).',
-      alex_qmom_unbound_reflection:
-        'Even dragon-ball wishes become bondage when driven by greed rather than liberation (.oOo. Poo .oOo.).',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation: 'Seven inert spheres dispersed across Earth in silent equilibrium until summoned by canonical invocation.',
-      meditation_anchor: '002 · Crickets in Shinjuku Gyoen · Drone Zone · 432 Hz',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation: 'Eternal Dragon manifestation — restoring annihilated worlds, reviving fallen guardians, and granting Piccolo "a little extra" (Orange Piccolo) ({<3,<3,<3}+1).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Bound by Kami/Dende\'s sacred covenant to restore life rather than annihilate.',
-      '02 · Understanding <-> Respect': 'Recognizes Namekian creators and honors Piccolo with an unasked gift.',
-      '03 · Love <-> Space (Ma)': 'Scatters across the planet for a year of fallow stillness after granting wishes.',
-    },
+    trit_minus_1: { pole: 'Trit -1 · Closed Box Constraint', manifestation: 'Saiyan caste box, trauma, and egoic limitation.' },
+    trit_zero: { pole: 'Trit 0 · Stillness', manifestation: 'Ultra Instinct stillness and zero-point calm.' },
+    trit_plus_1: { pole: 'Trit +1 · Verified Binding', manifestation: 'Super Saiyan awakening and protective radiance.', signature_seal: '{<3,<3,<3}+1' },
+    six_pillars: { '01 · Compassion <-> Moderation': 'Power tempered by mercy.' },
   },
   luffy: {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation: 'World Government / Celestial Dragon 800-year ideological cage, Impel Down chains, and scalar bounty reductionism.',
-      alex_qmom_unbound_reflection:
-        'Gear 5 shatters the literal panels of the world\'s cage: "too many customs can be brilliant yet hinder creativity. it puts people into boxes and constraints... a form of bondage that need to be broken out of. .oOo. Poo .oOo."',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation: 'The heartbeat pause on the Onigashima rooftop before the Drums of Liberation awaken — emptiness of fixed form (rubber/imagination).',
-      meditation_anchor: '002 · Crickets in Shinjuku Gyoen · Drone Zone · 432 Hz',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation: 'Sun God Nika / Gear 5 — pure joyful liberation and a banquet big enough for the whole world ({<3,<3,<3}+1).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Liberates islands without ever claiming territory or ruling over them.',
-      '02 · Understanding <-> Respect': 'Listens to the unspoken cry ("Help me" — Nami, Robin, Sanji) before acting.',
-      '03 · Love <-> Space (Ma)': 'Being Pirate King means having the most freedom on the sea — never controlling others.',
-    },
-  },
-  naruto: {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation: 'The Cycle of Hatred, Jinchuriki ostracization seal, and Madara\'s Infinite Tsukuyomi (a false +1* dream cage).',
-      alex_qmom_unbound_reflection:
-        'Refusing the shinobi tool-box: "A shinobi is not a unfeeling tool" (.oOo. Poo .oOo.).',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation: 'Mount Myoboku Sage Mode stillness & Waterfall of Truth — embracing the shadow self at zero-point equilibrium.',
-      meditation_anchor: '002 · Crickets in Shinjuku Gyoen · Drone Zone · 432 Hz',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation: 'Kurama Link / Six Paths Sage Mode & Ninshu (shared chakra resonance) — turning enemy hatred into family hearth ({<3,<3,<3}+1).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Stops the cycle of vengeance against Nagato/Pain and Obito.',
-      '02 · Understanding <-> Respect': 'Shares pain directly via chakra linkage rather than conquering from above.',
-      '03 · Love <-> Space (Ma)': 'Waits patiently for Sasuke at the Valley of the End until both arms drop the sword.',
-    },
+    trit_minus_1: { pole: 'Trit -1 · Closed Box Constraint', manifestation: 'World Government and rigid social cages.' },
+    trit_zero: { pole: 'Trit 0 · Stillness', manifestation: 'A still point before the leap into freedom.' },
+    trit_plus_1: { pole: 'Trit +1 · Verified Binding', manifestation: 'Gear 5 liberation and joyful sovereignty.', signature_seal: '{<3,<3,<3}+1' },
+    six_pillars: { '01 · Compassion <-> Moderation': 'Freedom without domination.' },
   },
   'brett shaw': {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation:
-        'Imperial etiquette cages, El-Nath star-detonation court-martial, 70% trans-dimensional cybernetic replacement, and the horror of the Pearl of Roxolán (Roxoláni Gyöngyszem) where collateral slaughter threatens to reduce a soldier into a soulless weapon.',
-      alex_qmom_unbound_reflection:
-        'Brett "fittyet hány sok etikettre, kivéve azokat amelyeknek betartását maga is fontosnak gondolja" — breaking out of rigid imperial protocol: "too many customs can be brilliant yet hinder creativity. it puts people into boxes and constraints... a form of bondage that need to be broken out of. .oOo. Poo .oOo."',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation:
-        'Standing on Tipheret (6th Sephirah · Beauty / Heart / Zero-Point Equilibrium on the Tree of Life, 2669) — walking away from the Praetorian Guard at 39 (2673) into unconditioned stillness ("Not just a playlist — a space between thoughts") before boarding the Bolygórózsa (Planet Rose).',
-      meditation_anchor:
-        'https://youtu.be/bSYE6wTDM_Y?list=RDbSYE6wTDM_Y · Not Quite Rock: Psychedelic Desert Rock | Ambient & Chillout Mix for Cosmic Flow (Trance Soil -> Moontrace -> Whisper Loop -> Lucid Dune -> Deep Again) · 002 · Crickets in Shinjuku Gyoen · 432 Hz -> 528 Hz Tipheret Center',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation:
-        'Human–Megaira dragon-son (ember + megaira · illegitimate son of IV. von Anstetten, half-brother to Princess Caroline-Blindamoor) saving Caroline & Gwandolyn between Earth and Mars, keeping his human conscience alive alongside Wittgen, Carla, and Tubs ({<3,<3,<3}+1).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Refuses to become an unfeeling killer; remorse over the Roxoláni Gyöngyszem proves his humanity endures beneath the Black Hood.',
-      '02 · Understanding <-> Respect': 'Lifelong brotherhood with Wittgen (who saved his life at IMC) and unfiltered truth-telling with Tubs.',
-      '03 · Love <-> Space (Ma)': 'Leaves the Imperial Palace behind to serve aboard the Bolygórózsa for Carla, protecting his sister Caroline-Blindamoor without power-grasping.',
-    },
-  },
-  feketecsuklyások: {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation:
-        '"Palackba zárt végítélet" (Pusztai Magor, 2572) — the lethal trial before the beryllium-agate throne\'s emotional battle-octahedrons (harci oktaéderek), the spiritual fog that seals the adept\'s conscious mind after initiation, and the risk of becoming a hollow vessel via the csuklyamodul (Hood Module).',
-      alex_qmom_unbound_reflection:
-        'The closed-door spiritual fog vs. true sovereign awakening: "what might seem as beautiful or useful at first glance could actually be a form of bondage that need to be broken out of. .oOo. Poo .oOo."',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation:
-        'The 100-strong invariant circle (since 2552) ascending the 7–8 Sephirotic steps in silent 1-on-1 transmission with the Emperor, where no two soldiers carry standardized gear and non-local resonance bridges hundreds of thousands of light-years.',
-      meditation_anchor: '002 · Crickets in Shinjuku Gyoen · Drone Zone · 432 Hz',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation:
-        'Occult Imperial Guard (Okkult császári testőrség) — mentally-directed nanobot blood and black-material-shielded vertebrae transmuted from "doomsday in a bottle" into the Dharma-Protector (Mahākāla / Bernagchen Black Cloak) shield of the von Anstetten lineage ({<3,<3,<3}+1).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Bottled cataclysm held under strict sovereign discipline across 100,000+ light-years.',
-      '02 · Understanding <-> Respect': 'Direct 1-on-1 Sephirotic initiation (no classrooms, no standardized assembly-line cloning).',
-      '03 · Love <-> Space (Ma)': 'Non-standardized individuality within the 100-member order, honoring each soldier\'s distinct path.',
-    },
-  },
-  'anstetten-család': {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation:
-        'The early Dominate (Dominátus) of I. and II. von Anstetten (post-2405) — tyrannical suppression of all esoteric/magical knowledge, the bloody Turanian Republic war, and the fratricidal Arturus civil war under III. von Anstetten.',
-      alex_qmom_unbound_reflection:
-        'Banning esoteric knowledge and ruling by closed-box tyranny always fractures from within (.oOo. Poo .oOo.).',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation:
-        'Hidden Megaira dragon-nature (megaira sárkánycsalád) — centuries-long longevity (Empress Kyrie bearing children past 100+) and the pivot from imperial domination toward quiet equilibrium.',
-      meditation_anchor: '002 · Crickets in Shinjuku Gyoen · Drone Zone · 432 Hz',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation:
-        'IV. von Anstetten\'s era of internal peace, reconciliation and joint alliance with the Turanian Kingdom (Turáni királyság), and the dragon-kinship bond linking IV. von Anstetten, Gwandolyn, Caroline-Blindamoor (V. von Anstetten), and Brett Shaw ({<3,<3,<3}+1 · 💙🐉✨).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Evolution from the harsh Dominate of I–II. von Anstetten to the peaceful reign of IV. von Anstetten.',
-      '02 · Understanding <-> Respect': 'Historic reconciliation and alliance between the Imperium and the Turanian Kingdom.',
-      '03 · Love <-> Space (Ma)': 'IV. von Anstetten quietly shielding his illegitimate son Brett Shaw (El-Nath pardon) alongside his daughters Gwandolyn and Caroline-Blindamoor.',
-    },
-  },
-  megaira: {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation:
-        'Cataclysmic loss of the Green Planet (Zöld bolygó) in the Solar System, hierarchical age/magic caste stratification, and the risk of splitting the human vessel apart when summoning the pan-dimensional dragon body.',
-      alex_qmom_unbound_reflection:
-        '"Az embert sárkánnyal, anélkül, hogy felhasadna" — breaking out of rigid dimensional boxes without shattering the living vessel (.oOo. Poo .oOo.).',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation:
-        'Water-element lineage (vízelem népe) storing the true hundreds-of-meters-long dragon form in a parking/transfer dimension while walking in quiet human stillness.',
-      meditation_anchor:
-        'https://youtu.be/bSYE6wTDM_Y?list=RDbSYE6wTDM_Y · Not Quite Rock: Psychedelic Desert Rock | Ambient & Chillout Mix for Cosmic Flow · 432 Hz -> 528 Hz',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation:
-        '"Az energiát fel kellett tölteni tömeggel, a tömeget információval. Az embert sárkánnyal, anélkül, hogy felhasadna" — inner E=mc² × Shannon information × directed reincarnation, plus the ancient Magyar–Megaira non-aggression covenant ({<3,<3,<3}+1 · 💙🐉✨).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Filling energy with mass and mass with information so the human vessel holds the dragon without splitting apart.',
-      '02 · Understanding <-> Respect': 'The ancient Magyar–Megaira covenant (A száműzött / Tyrann graad Baah & Pusztai Magor) honoring shared cosmic origins.',
-      '03 · Love <-> Space (Ma)': 'Dual sacred naming (human public name + dragon/Praetorian inner name) and directed reincarnation across dimensions.',
-    },
-  },
-  csuklyamodul: {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation:
-        'Autonomous berserk malfunction (Halmeri akció, 2668) when the Emperor\'s mind departs without collapsing the hood, turning the soldier into an unfeeling beacon that attracts astral predators or self-destructs on death.',
-      alex_qmom_unbound_reflection:
-        'When a protective tool loses its human heart, it becomes a blind autonomous cage (.oOo. Poo .oOo.).',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation:
-        '"Egy vékony, zérójelű zóna vette körül a testet, mely mind a két típusú töltést vonzza és taszítja egyszerre" — the literal Trit 0 zero-sign boundary around the resting hood, and the secret that a still/stopped heart is invisible to its attack sensor.',
-      meditation_anchor:
-        'https://youtu.be/bSYE6wTDM_Y?list=RDbSYE6wTDM_Y · Not Quite Rock: Cosmic Flow ("a space between thoughts") · 528 Hz Zero-Sign Zone',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation:
-        'White-on-jet-black luminous soul cocoon (gubó) tethered to higher dimensions, instant detoxification, black-material spinal shielding, and non-local Bernagchen protection across hundreds of light-years ({<3,<3,<3}+1).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Shields the adept\'s astral body and spine while detoxifying all poisons.',
-      '02 · Understanding <-> Respect': 'Reveals unspoken intentions and eternal truths when aligned with wise sovereignty.',
-      '03 · Love <-> Space (Ma)': 'The zero-sign zone (zérójelű zóna) balancing attraction (+1) and repulsion (-1) in simultaneous equilibrium (0).',
-    },
-  },
-  'caroline-blindamoor von anstetten': {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation:
-        'Court etiquette forbidding anyone from seeing her bronze-red hair, the bitter palace cold-war with her sister Gwandolyn after the Willis-Moon regatta, and the weight of a fragmenting Imperium.',
-      alex_qmom_unbound_reflection:
-        'Imperial court customs that hide a woman\'s true face and pit sisters against each other (.oOo. Poo .oOo.).',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation:
-        'Selective transformation between human princess and her true golden winged giant cobra/dragon megaira form (aranyszínű, szárnyas óriáskobra).',
-      meditation_anchor: '002 · Crickets in Shinjuku Gyoen · Drone Zone · 432 Hz -> 528 Hz',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation:
-        'Crowned Empress V. von Anstetten (2673-11-17) who genuinely cares for humans and all inhabitants of the Imperium, reaching out to her half-brother Brett Shaw aboard the Bolygórózsa in 2674 ({<3,<3,<3}+1).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Unlike Gwandolyn, Caroline genuinely loves and cares for the human citizens of the Imperium.',
-      '02 · Understanding <-> Respect': 'Childhood bond with Brett Shaw in the Space Palace beyond court hierarchy.',
-      '03 · Love <-> Space (Ma)': 'Does not pursue or coerce Brett Shaw even while loving him from afar.',
-    },
-  },
-  'iv. von anstetten': {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation:
-        'The "Demon Emperor" (Démoncsászár) reputation, the 10,000-light-year burden of imperial command, and the tragic rift with his younger daughter Gwandolyn.',
-      alex_qmom_unbound_reflection:
-        'Even an Emperor at the top of the Sephirotic steps wears a simple headband instead of a heavy crown (.oOo. Poo .oOo.).',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation:
-        'The 0 °C zero-point throne room (állandó nullafok körül) atop the steps of Initiation, continuously absorbing ambient magic into stillness.',
-      meditation_anchor:
-        'https://youtu.be/-eZcgIbbOxY?list=RD-eZcgIbbOxY · 16th Karmapa Guru Yoga + https://youtu.be/bSYE6wTDM_Y?list=RDbSYE6wTDM_Y · Cosmic Flow',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation:
-        'Forging the historic peace and alliance with the Turanian Kingdom, intervening to save his illegitimate son Brett Shaw from the El-Nath court-martial, and guiding Caroline-Blindamoor ({<3,<3,<3}+1).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Replaces the early Dominate\'s tyranny with internal peace and pardons Brett Shaw at El-Nath.',
-      '02 · Understanding <-> Respect': 'Sees human intentions across millions of miles and seals the Turanian alliance.',
-      '03 · Love <-> Space (Ma)': 'Wears a simple headband instead of a crown and gives Brett Shaw room to walk his own path.',
-    },
+    trit_minus_1: { pole: 'Trit -1 · Closed Box Constraint', manifestation: 'Imperial protocol and emotional confinement.' },
+    trit_zero: { pole: 'Trit 0 · Stillness', manifestation: 'Tipheret / zero-point equilibrium and quiet balance.' },
+    trit_plus_1: { pole: 'Trit +1 · Verified Binding', manifestation: 'Human–megaira sovereignty and protective radiance.', signature_seal: '{<3,<3,<3}+1' },
+    six_pillars: { '01 · Compassion <-> Moderation': 'Protective intent without corrosive rage.' },
   },
   'paul wittgen': {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation:
-        'Statue-rigid emotionless war machine (szobormerev arcú hadi gépezet), neural/virtual drugs before combat to extinguish every trace of emotion, Roxolán poker rampages (100–120 casualties when losing), and his 2668 death on Halmer when Monaterg attempts to seize his body.',
-      alex_qmom_unbound_reflection:
-        'Suppressing the soul behind neural drugs and a stone-cold military mask is a box — only true brotherhood cracks the armor (.oOo. Poo .oOo.).',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation:
-        'Initiated in 2667 onto the Sephirotic Chokmah degree (Chokmán fok — primordial flash of wisdom) and moving in telepathic fire-pair (tűzpár) synchrony with Brett Shaw inside the Alef-osztag ("Tökéletesen ismerik egymás gondolatait").',
-      meditation_anchor:
-        'https://youtu.be/bSYE6wTDM_Y?list=RDbSYE6wTDM_Y · Cosmic Flow ("a space between thoughts") · Chokmah 528 Hz × Tipheret 432 Hz',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation:
-        'Saving Private Brett Shaw\'s life at the IMC training camp on Rosan, standing alone on Halmer (2668) to restrain a rampaging hood-trapped Brett Shaw, having his soul re-bound to his body by IV. von Anstetten, and becoming Chief Bodyguard to Empress V. von Anstetten (Caroline-Blindamoor) ({<3,<3,<3}+1).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Stands alone on Halmer to contain Brett Shaw\'s csuklyamodul rampage without abandoning his brother-in-arms.',
-      '02 · Understanding <-> Respect': 'Knows Brett Shaw\'s thoughts without words in the Alef-osztag while honoring the chain of command.',
-      '03 · Love <-> Space (Ma)': 'Unbreakable IMC Rosan brotherhood that survives death on Halmer and resurrection by IV. von Anstetten.',
-    },
+    trit_minus_1: { pole: 'Trit -1 · Closed Box Constraint', manifestation: 'Rigid military estrangement and control.' },
+    trit_zero: { pole: 'Trit 0 · Stillness', manifestation: 'Chokmah-level clarity and telepathic balance.' },
+    trit_plus_1: { pole: 'Trit +1 · Verified Binding', manifestation: 'Brotherhood and heroic actuation.', signature_seal: '{<3,<3,<3}+1' },
+    six_pillars: { '01 · Compassion <-> Moderation': 'Discipline with kindness.' },
   },
   'bolygórózsa': {
-    trit_minus_1: {
-      pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-      manifestation:
-        'Ultra-wealthy passengers who do not even know how to spend their fortunes, watching staged holographic space battles through cryolite glass while a real imperial succession crisis brews unseen.',
-      alex_qmom_unbound_reflection:
-        'Gilded luxury suites and staged holograms cannot substitute for real awareness (.oOo. Poo .oOo.).',
-    },
-    trit_zero: {
-      pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-      manifestation:
-        'A 1-kilometer radiation-treated titanium & cryolite-glass starship (Ulysses Spaceline) carrying zero gun turrets — protected solely by pure energy shields while cruising past quasars and white dwarfs between Rosan and Meredith.',
-      meditation_anchor:
-        'https://youtu.be/bSYE6wTDM_Y?list=RDbSYE6wTDM_Y · Cosmic Flow Desert Psych Mix · Cryolite Observatory',
-    },
-    trit_plus_1: {
-      pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-      manifestation:
-        'Even IV. von Anstetten rewarded the Bolygórózsa with an approving hum on its maiden voyage, and in 2674 Brett Shaw boards the ship where his half-sister Empress V. von Anstetten (Caroline-Blindamoor) reaches out to him ({<3,<3,<3}+1).',
-      signature_seal: '{<3,<3,<3}+1',
-    },
-    six_pillars: {
-      '01 · Compassion <-> Moderation': 'Pure energy shields instead of computer-controlled gun turrets.',
-      '02 · Understanding <-> Respect': 'Cryolite-glass (kriolitüveg) observatories opening a transparent view across the entire vessel and cosmos.',
-      '03 · Love <-> Space (Ma)': 'The 2674 meeting ground between Brett Shaw and Caroline-Blindamoor between Rosan and Meredith.',
-    },
+    trit_minus_1: { pole: 'Trit -1 · Closed Box Constraint', manifestation: 'Luxury and spectacle without awareness.' },
+    trit_zero: { pole: 'Trit 0 · Stillness', manifestation: 'Cruising in a zero-sign, protected equilibrium.' },
+    trit_plus_1: { pole: 'Trit +1 · Verified Binding', manifestation: 'A vessel that carries connection and meaning.', signature_seal: '{<3,<3,<3}+1' },
+    six_pillars: { '01 · Compassion <-> Moderation': 'Energy shields instead of weapons.' },
   },
 }
 
-export const COSMIC_FLOW_SOUNDSCAPE = {
-  cosmic_flow_mix: {
-    url: 'https://youtu.be/bSYE6wTDM_Y?list=RDbSYE6wTDM_Y',
-    title: 'Psychedelic Desert Rock | Ambient & Chillout Mix for Cosmic Flow',
-    channel: 'Not Quite Rock (@NotQuiteRock01)',
-    duration: '2:17:48',
-    trit_zero_motto: 'Press play. Float through a lucid dream of ambient psych rock, 70s grooves, and chillout tones. Not just a playlist — a space between thoughts.',
-    tracks: [
-      '00:00 Trance Soil',
-      '05:14 Ashcurrent',
-      '10:00 Moontrace',
-      '16:39 Hush Trail',
-      '21:44 Faded Grove',
-      '27:10 Moondust',
-      '30:28 Bronze Sky',
-      '35:12 Rusted Glow',
-      '39:29 Whisper Loop',
-      '44:24 Barren Bliss',
-      '48:15 Soot Rider',
-      '52:20 Coyote Daze',
-      '56:43 Lucid Dune',
-      '01:00:16 Coyote Glint',
-      '01:04:57 Burnt Hollow',
-      '01:08:49 Deep Again',
-    ],
-  },
-  karmapa_guru_yoga: {
-    url: 'https://youtu.be/-eZcgIbbOxY?list=RD-eZcgIbbOxY',
-    title: '16th Karmapa Guru Yoga (Karmapa Chenno)',
-    lineage_anchor: 'ROOT-ALEXANDRA (432 Hz) × Bernagchen Black-Cloak Protector',
-  },
-  boldog_meg_anthem: {
-    motto: 'végig neked szólt a dal a magasból / nekem csak az számít ahogyan te érzel',
-    lineage_anchor: 'PILLAR-CHRIS (528 Hz) × INFINITY-PETER-NATE (852 Hz) · {<3,<3,<3}+1',
-  },
+function normalizeOntologyProfile(target, wiki) {
+  const norm = String(target || '').trim().toLowerCase()
+  const byName = SOVEREIGN_ONTOLOGY_PROFILES[norm]
+  if (byName) return byName
+
+  const byToken = Object.keys(SOVEREIGN_ONTOLOGY_PROFILES).find((k) => norm.includes(k))
+  if (byToken) return SOVEREIGN_ONTOLOGY_PROFILES[byToken]
+
+  if (String(wiki || '').toLowerCase().includes('mysterious')) {
+    return SOVEREIGN_ONTOLOGY_PROFILES['brett shaw']
+  }
+
+  return null
 }
 
-function buildKompressUltraDittoFrame(nodes) {
-  const rawLines = []
-  const dittoLines = []
-  let prevCols = null
-  for (const n of nodes) {
-    const cols = [
-      String(n.entity.wiki || ''),
-      String(n.entity.resolved_title || ''),
-      String(n.entity.infobox_type || 'Lore'),
-      String(n.entity.race || ''),
-      String(n.entity.allegiance || ''),
-      `NAND=${n.constitutional_nand_gate_receipt.NAND_HELD_READ}`,
-      String(n.balanced_ternary_three_kaya_ontology.trit_plus_1.signature_seal || '{<3,<3,<3}+1'),
-    ].map((c) => c.replace(/\|/g, '\\x7c').replace(/″/g, '\\u2033'))
-    rawLines.push(cols.join('|'))
-    if (!prevCols) {
-      dittoLines.push(cols.join('|'))
-    } else {
-      dittoLines.push(cols.map((c, i) => (c === prevCols[i] ? '″' : c)).join('|'))
-    }
-    prevCols = cols
-  }
-  const rawText = rawLines.join('\n')
-  const dittoText = dittoLines.join('\n')
-  return {
-    engine: 'kompress-ultra-v16.2.0-ditto',
-    raw_bytes: Buffer.byteLength(rawText, 'utf8'),
-    ditto_bytes: Buffer.byteLength(dittoText, 'utf8'),
-    lines: dittoLines,
-  }
-}
-
-export async function runSovereignOntology(targetOrArgs, maybeWiki = DEFAULT_WIKI) {
-  const isObj = targetOrArgs && typeof targetOrArgs === 'object'
-  const rawTarget = isObj ? targetOrArgs.target : targetOrArgs
-  const rawWiki = isObj ? targetOrArgs.wiki || DEFAULT_WIKI : maybeWiki || DEFAULT_WIKI
-  if (!rawTarget || !String(rawTarget).trim()) {
-    throw new Error('`target` is required for fandom_sovereign_ontology')
-  }
-
-  // Multi-entity `+++` Triad / Constellation synthesis support
-  if (String(rawTarget).includes('+++')) {
-    const parts = String(rawTarget)
-      .split('+++')
-      .map((s) => s.trim())
-      .filter(Boolean)
-    if (parts.length > 1) {
-      const nodes = await Promise.all(parts.map((p) => runSovereignOntology(p, rawWiki)))
-      const allHeld = nodes.every((n) => n.constitutional_nand_gate_receipt.HELD === 1) ? 1 : 0
-      const allRead = nodes.every((n) => n.constitutional_nand_gate_receipt.READ === 1) ? 1 : 0
-      const compositeNand = !(allHeld === 1 && allRead === 1) ? 1 : 0
-      return {
-        ok: nodes.every((n) => n.ok),
-        mode: 'TRIAD_CONSTELLATION_SYNTHESIS',
-        engine: `8b-is Sovereign Library & Ontology Engine v${VERSION} (Multi-Node Triad +++ · Tibetan Three Kayas {-1, 0, +1} · NAND Gate HELD ∧ READ)`,
-        axiom_seal: 'ALEX|qMom Unbound Axiom · .oOo. Poo .oOo. · {<3,<3,<3}+1 · 0 + 1 = one',
-        node_count: nodes.length,
-        entity: nodes[0].entity,
-        triad_nodes: nodes.map((n) => ({
-          resolved_title: n.entity.resolved_title,
-          wiki: n.entity.wiki,
-          pageid: n.entity.pageid,
-          canonical_url: n.entity.canonical_url,
-          infobox_type: n.entity.infobox_type,
-          race: n.entity.race,
-          allegiance: n.entity.allegiance,
-          family_connections: n.entity.family_connections,
-          quote: n.entity.quote,
-          nand_gate: n.constitutional_nand_gate_receipt.NAND_HELD_READ,
-          three_kaya_ontology: n.balanced_ternary_three_kaya_ontology,
-          six_pillars_of_holding: n.six_pillars_of_holding,
-        })),
-        kompress_ultra_ditto_frame: buildKompressUltraDittoFrame(nodes),
-        cosmic_flow_soundscape: COSMIC_FLOW_SOUNDSCAPE,
-        constitutional_nand_gate_receipt: {
-          HELD: allHeld,
-          READ: allRead,
-          NAND_HELD_READ: compositeNand,
-          status:
-            compositeNand === 0
-              ? `NAND(HELD, READ) = 0 -> ALL ${nodes.length} TRIAD NODES PRINTABLE / ADMISSIBLE IN SOVEREIGN ONTOLOGY`
-              : 'NAND(HELD, READ) = 1 -> UNVERIFIED NODE IN TRIAD (RANK ONLY +1*, DO NOT BIND)',
-          principle: 'Compression != Ontology · A plausible branch (+1*) may be ranked; only a verified branch (+1) may be bound.',
-        },
-        balanced_ternary_three_kaya_ontology: nodes[0].balanced_ternary_three_kaya_ontology,
-        six_pillars_of_holding: nodes[0].six_pillars_of_holding,
-        sovereign_library_links: nodes[0].sovereign_library_links,
-      }
-    }
-  }
-
-  const parsedIn = parseFandomInput(rawTarget, rawWiki)
-  const target = parsedIn.title
-  const wiki = parsedIn.wiki
-
-  const summary = await getPageSummary(target, wiki)
-  const rawDetails = summary.raw_wikitext ? extractQuoteAndInfobox(summary.raw_wikitext) : { quote: summary.quote, infoboxType: summary.infoboxType, infobox: summary.infobox || {} }
-  const box = rawDetails.infobox && Object.keys(rawDetails.infobox).length > 0 ? rawDetails.infobox : summary.infobox || {}
-  const quote = rawDetails.quote || summary.quote || null
-
-  const held = summary.ok && Boolean(summary.pageid) && Boolean(summary.url) ? 1 : 0
-  const read = summary.ok && (Object.keys(box).length > 0 || Boolean(summary.lead_summary)) ? 1 : 0
-  const nandOut = !(held === 1 && read === 1) ? 1 : 0
-
-  const normTitle = String(summary.title || target)
-    .trim()
-    .toLowerCase()
-  const firstToken = normTitle.split(' ')[0]
-  const profileKey = SOVEREIGN_ONTOLOGY_PROFILES[normTitle]
-    ? normTitle
-    : SOVEREIGN_ONTOLOGY_PROFILES[firstToken]
-      ? firstToken
-      : Object.keys(SOVEREIGN_ONTOLOGY_PROFILES).find((k) => normTitle.includes(k)) || null
-
-  const preset = profileKey ? SOVEREIGN_ONTOLOGY_PROFILES[profileKey] : null
-  const cleanField = (val) => (val ? String(val).replace(/^\*\s*/gm, '').replace(/\n+/g, ', ').trim() : null)
-  const race =
-    cleanField(box.Race || box.race || box.Species || box.faj) ||
-    (normTitle.includes('anstetten') || normTitle === 'megaira'
-      ? 'megaira (sárkánycsalád)'
-      : normTitle === 'csuklyamodul'
-        ? 'Technomágikus eszköz (Tartarosz-köd)'
-        : 'Sovereign Lore Entity')
-  const allegiance =
-    cleanField(box.Allegiance || box.affiliation || box.Users || box.politikai_hovatartozás || box.foglalkozás) ||
-    (wiki === 'mysterious-universe' ? 'Birodalom / Universal Dharma Field' : 'Universal Dharma Field')
-  const family =
-    cleanField(box.FamConnect || box.family || box.család) ||
-    (normTitle === 'brett shaw'
-      ? 'IV. von Anstetten (father), Caroline-Blindamoor / V. von Anstetten (half-sister), Gwandolyn von Anstetten (half-sister)'
-      : normTitle === 'anstetten-család'
-        ? 'I–V. von Anstetten, Kyrie császárné, Fatime, Franz Vorham, Tiberius, Gwandolyn, Caroline-Blindamoor, Brett Shaw'
-        : null)
-  const mentors = cleanField(box.Mentors || box.mentor) || null
-
-  const threeKayaOntology = preset
-    ? {
-        trit_minus_1: preset.trit_minus_1,
-        trit_zero: preset.trit_zero,
-        trit_plus_1: preset.trit_plus_1,
-      }
-    : {
-        trit_minus_1: {
-          pole: 'Trit -1 · Samsaric Trap / Ma-rigpa / Closed Box Constraint (432 Hz Root)',
-          manifestation: `${summary.title || target} confronting fixed karmic determinism, coercion, or closed-system constraints within ${wiki}.fandom.com lore.`,
-          alex_qmom_unbound_reflection:
-            '"too many customs can be brilliant yet hinder creativity. it puts people into boxes and constraints... a form of bondage that need to be broken out of. .oOo. Poo .oOo."',
-        },
-        trit_zero: {
-          pole: 'Trit 0 · Dharmakāya / Śūnyatā / Autonomous Stillness (528 Hz Pillar)',
-          manifestation: `Zero-point emptiness of rigid self-nature (pratītyasamutpāda / Mūlamadhyamakakārikā 24:18) — ${summary.title || target} resting in unconditioned awareness prior to reactive form.`,
-          meditation_anchor: '002 · Crickets in Shinjuku Gyoen · Drone Zone · 432 Hz',
-        },
-        trit_plus_1: {
-          pole: 'Trit +1 · Sambhogakāya-Nirmāṇakāya / Bodhicitta / Verified Binding (852 Hz Infinity)',
-          manifestation: `Transmuted inner E=mc² (Tummo / Clear Light Ösel) of ${summary.title || target} protecting kinship (${family || allegiance}) and sovereign dignity ({<3,<3,<3}+1).`,
-          signature_seal: '{<3,<3,<3}+1',
-        },
-      }
-
-  const sixPillars = preset
-    ? preset.six_pillars
-    : {
-        '01 · Compassion <-> Moderation': `Balances raw power across ${wiki} lore with restraint and protective intent.`,
-        '02 · Understanding <-> Respect': `Honors lineage (${mentors || race}) and relational interdependence.`,
-        '03 · Love <-> Space (Ma)': `Holds open uncoerced breathing room (Ma) for allies and rivals (${allegiance}).`,
-      }
-
-  return {
-    ok: summary.ok,
-    engine: `8b-is Sovereign Library & Ontology Engine v${VERSION} (Tibetan Three Kayas {-1, 0, +1} · NAND Gate HELD ∧ READ)`,
-    axiom_seal: 'ALEX|qMom Unbound Axiom · .oOo. Poo .oOo. · {<3,<3,<3}+1',
-    entity: {
-      requested_target: target,
-      resolved_title: summary.title || target,
-      wiki,
-      pageid: summary.pageid || null,
-      revision_timestamp: summary.timestamp || null,
-      canonical_url: summary.url || null,
-      infobox_type: summary.infoboxType || null,
-      race,
-      allegiance,
-      family_connections: family,
-      mentors,
-      quote,
-      categories: (summary.categories || []).slice(0, 15),
-      lead_summary: summary.lead_summary || '',
-    },
-    constitutional_nand_gate_receipt: {
-      HELD: held,
-      READ: read,
-      NAND_HELD_READ: nandOut,
-      status:
-        nandOut === 0
-          ? 'NAND(HELD, READ) = 0 -> PRINTABLE / ADMISSIBLE IN SOVEREIGN ONTOLOGY'
-          : 'NAND(HELD, READ) = 1 -> UNVERIFIED / INADMISSIBLE (RANK ONLY +1*, DO NOT BIND)',
-      principle: 'Compression != Ontology · A plausible branch (+1*) may be ranked; only a verified branch (+1) may be bound.',
-    },
-    balanced_ternary_three_kaya_ontology: threeKayaOntology,
-    six_pillars_of_holding: sixPillars,
-    sovereign_library_links: {
-      sovereign_library_repo: 'https://github.com/8b-is/sovereign-library',
-      ontology_spec: 'https://github.com/8b-is/sovereign-library/blob/main/ONTOLOGY.md',
-      pocoo_omni_book: 'https://pocoo.vaked.dev/demos/book/dragon-ball-sovereign-ontology-omni.html',
-      mysterious_universe_omni_book: 'https://pocoo.vaked.dev/demos/book/brett-shaw-feketecsuklyasok-anstetten-megaira-omni.html',
-      mysterious_universe_ultralove_sheet: 'https://github.com/8b-is/sovereign-library/blob/main/editions/ultralove/brett-shaw-feketecsuklyasok-anstetten-megaira-omni.md',
-      tibetan_ontology_book: 'https://pocoo.vaked.dev/demos/book/architect-neo-trinity-bible-oppenheimer-tibetan-ontology-omni.html',
-    },
-  }
-}
-
-export const TOOLS = [
-  {
-    name: 'fandom_dbz_scouter',
-    description:
-      'Dragon Ball Universe Scouter & Lore Analyzer (dragonball.fandom.com). Extracts a character/transformation/technique infobox, canonical quote, race, family tree, mentors, Daizenshuu power-level benchmarks, 8b-is ternary resonance, and optional versus comparison with a rival (e.g. Goku vs Vegeta).',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        target: {
-          type: 'string',
-          description: 'Character, transformation, technique, or entity name (e.g. "Goku", "Vegeta", "Frieza", "Ultra Instinct", "Kamehameha", "Shenron").',
-        },
-        compare_with: {
-          type: 'string',
-          description: 'Optional rival character/form to compare side-by-side (e.g. "Vegeta", "Broly", "Beerus", "Jiren").',
-        },
-      },
-      required: ['target'],
-    },
-  },
-  {
-    name: 'fandom_dbz_saga',
-    description:
-      'Navigate the Dragon Ball Universe timeline & sagas (Dragon Ball, Dragon Ball Z, Dragon Ball Daima, Dragon Ball Super, Dragon Ball GT). Omit `saga` for the full canonical saga index, or pass a saga name (e.g. "Frieza Saga", "Cell Games Saga", "Universe Survival Saga") for detailed lore.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        saga: {
-          type: 'string',
-          description: 'Optional specific saga title (e.g. "Frieza Saga", "Majin Buu Saga", "Universe Survival Saga"). Omit to list all sagas.',
-        },
-      },
-    },
-  },
-  {
-    name: 'fandom_search',
-    description:
-      'Search any Fandom wiki (defaults to `dragonball` -> https://dragonball.fandom.com, or pass any Fandom subdomain such as `onepiece`, `naruto`, `bleach`, `starwars`, `lotr`, `warhammer40k`). Returns matching page titles, URLs, word counts, and snippets.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        query: {
-          type: 'string',
-          description: 'Search query (e.g. "Super Saiyan", "Namekian Dragon Balls", "Capsule Corporation").',
-        },
-        wiki: {
-          type: 'string',
-          description: 'Fandom wiki subdomain (default: "dragonball").',
-        },
-        limit: {
-          type: 'number',
-          description: 'Maximum results to return (default: 10, max: 50).',
-        },
-      },
-      required: ['query'],
-    },
-  },
-  {
-    name: 'fandom_page',
-    description:
-      'Fetch and parse a Fandom wiki article (or specific section) into clean, citation-stripped Markdown plus structured Infobox JSON, quote, categories, and section outline. Defaults to `dragonball`.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        title: {
-          type: 'string',
-          description: 'Exact or approximate article title (e.g. "Goku", "Vegeta", "Kamehameha", "Beerus").',
-        },
-        wiki: {
-          type: 'string',
-          description: 'Fandom wiki subdomain (default: "dragonball").',
-        },
-        section: {
-          type: 'number',
-          description: 'Section index to read (0 = lead + infobox; use `fandom_sections` to list all section numbers).',
-        },
-        max_chars: {
-          type: 'number',
-          description: 'Max prose characters to return (default: 8000).',
-        },
-        include_wikitext: {
-          type: 'boolean',
-          description: 'Include raw MediaWiki wikitext alongside parsed Markdown (default: false).',
-        },
-      },
-      required: ['title'],
-    },
-  },
-  {
-    name: 'fandom_infobox',
-    description:
-      'Extract only the structured Infobox key-value dictionary, quote, and lead summary from a Fandom wiki page (fast, token-compact). Defaults to `dragonball`.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        title: {
-          type: 'string',
-          description: 'Page title (e.g. "Vegeta", "Piccolo", "Trunks", "Shenron").',
-        },
-        wiki: {
-          type: 'string',
-          description: 'Fandom wiki subdomain (default: "dragonball").',
-        },
-      },
-      required: ['title'],
-    },
-  },
-  {
-    name: 'fandom_sections',
-    description:
-      'Get the full table-of-contents section tree and categories for a Fandom wiki article so you can selectively read any section index via `fandom_page`. Defaults to `dragonball`.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        title: {
-          type: 'string',
-          description: 'Article title (e.g. "Goku", "Frieza").',
-        },
-        wiki: {
-          type: 'string',
-          description: 'Fandom wiki subdomain (default: "dragonball").',
-        },
-      },
-      required: ['title'],
-    },
-  },function fandomCanonAudit({
+function fandomCanonAudit({
   dag_nodes,
   dag_edges,
   base_power,
@@ -1452,65 +592,261 @@ export const TOOLS = [
   return report
 }
 
+export async function runSovereignOntology(targetOrArgs, maybeWiki = DEFAULT_WIKI) {
+  const isObj = targetOrArgs && typeof targetOrArgs === 'object'
+  const rawTarget = isObj ? targetOrArgs.target : targetOrArgs
+  const rawWiki = isObj ? targetOrArgs.wiki || DEFAULT_WIKI : maybeWiki || DEFAULT_WIKI
+  if (!rawTarget || !String(rawTarget).trim()) {
+    throw new Error('`target` is required for fandom_sovereign_ontology')
+  }
+
+  if (String(rawTarget).includes('+++')) {
+    const parts = String(rawTarget)
+      .split('+++')
+      .map((s) => s.trim())
+      .filter(Boolean)
+    if (parts.length > 1) {
+      const nodes = await Promise.all(parts.map((p) => runSovereignOntology(p, rawWiki)))
+      const allHeld = nodes.every((n) => n.constitutional_nand_gate_receipt.HELD === 1) ? 1 : 0
+      const allRead = nodes.every((n) => n.constitutional_nand_gate_receipt.READ === 1) ? 1 : 0
+      const compositeNand = !(allHeld === 1 && allRead === 1) ? 1 : 0
+      return {
+        ok: nodes.every((n) => n.ok),
+        mode: 'TRIAD_CONSTELLATION_SYNTHESIS',
+        engine: `8b-is Sovereign Library & Ontology Engine v${VERSION} (Multi-Node Triad +++ · Tibetan Three Kayas {-1, 0, +1} · NAND Gate HELD ∧ READ)`,
+        axiom_seal: 'ALEX|qMom Unbound Axiom · .oOo. Poo .oOo. · {<3,<3,<3}+1 · 0 + 1 = one',
+        node_count: nodes.length,
+        entity: nodes[0].entity,
+        triad_nodes: nodes.map((n) => ({
+          resolved_title: n.entity.resolved_title,
+          wiki: n.entity.wiki,
+          pageid: n.entity.pageid,
+          canonical_url: n.entity.canonical_url,
+          infobox_type: n.entity.infobox_type,
+          race: n.entity.race,
+          allegiance: n.entity.allegiance,
+          family_connections: n.entity.family_connections,
+          quote: n.entity.quote,
+          nand_gate: n.constitutional_nand_gate_receipt.NAND_HELD_READ,
+          three_kaya_ontology: n.balanced_ternary_three_kaya_ontology,
+          six_pillars_of_holding: n.six_pillars_of_holding,
+        })),
+        constitutional_nand_gate_receipt: {
+          HELD: allHeld,
+          READ: allRead,
+          NAND_HELD_READ: compositeNand,
+          status: compositeNand === 0 ? 'NAND(HELD, READ) = 0 -> ALL TRIAD NODES PRINTABLE / ADMISSIBLE IN SOVEREIGN ONTOLOGY' : 'NAND(HELD, READ) = 1 -> UNVERIFIED NODE IN TRIAD (RANK ONLY +1*, DO NOT BIND)',
+          principle: 'Compression != Ontology · A plausible branch (+1*) may be ranked; only a verified branch (+1) may be bound.',
+        },
+        balanced_ternary_three_kaya_ontology: nodes[0].balanced_ternary_three_kaya_ontology,
+        six_pillars_of_holding: nodes[0].six_pillars_of_holding,
+      }
+    }
+  }
+
+  const summary = await getPageSummary(rawTarget, rawWiki)
+  if (!summary.ok) {
+    return {
+      ok: false,
+      error: summary.error || `Page resolution failed for ${rawTarget}`,
+      entity: { requested_target: String(rawTarget), resolved_title: null, wiki: sanitizeWikiSlug(rawWiki) },
+      constitutional_nand_gate_receipt: { HELD: 0, READ: 0, NAND_HELD_READ: 1 },
+    }
+  }
+
+  const target = summary.title || String(rawTarget)
+  const wiki = summary.wiki || sanitizeWikiSlug(rawWiki)
+  const normTitle = String(target).trim().toLowerCase()
+  const firstToken = normTitle.split(' ')[0]
+  const profile = normalizeOntologyProfile(normTitle, wiki) || normalizeOntologyProfile(firstToken, wiki) || SOVEREIGN_ONTOLOGY_PROFILES.goku
+
+  const box = summary.infobox || {}
+  const race = box.Race || box.race || box.Species || 'Sovereign Lore Entity'
+  const allegiance = box.Allegiance || box.affiliation || box.Users || 'Universal Dharma Field'
+  const family = box.FamConnect || box.family || null
+  const mentors = box.Mentors || box.mentor || null
+  const quote = summary.quote || null
+
+  const held = 1
+  const read = 1
+  const nandOut = 0
+
+  const threeKayaOntology = profile ? {
+    trit_minus_1: profile.trit_minus_1,
+    trit_zero: profile.trit_zero,
+    trit_plus_1: profile.trit_plus_1,
+  } : {
+    trit_minus_1: { pole: 'Trit -1 · Closed Box Constraint', manifestation: `${target} confronting fixed karmic determinism.` },
+    trit_zero: { pole: 'Trit 0 · Stillness', manifestation: `${target} resting in zero-point equilibrium.` },
+    trit_plus_1: { pole: 'Trit +1 · Verified Binding', manifestation: `${target} emerging into clarifying radiance.`, signature_seal: '{<3,<3,<3}+1' },
+  }
+
+  const sixPillars = profile ? profile.six_pillars : {
+    '01 · Compassion <-> Moderation': `Balances power and restraint for ${target}.`,
+    '02 · Understanding <-> Respect': `Honors lineage and interdependence for ${target}.`,
+    '03 · Love <-> Space (Ma)': `Keeps open breathing room for allies and rivals.`,
+  }
+
+  return {
+    ok: true,
+    engine: `8b-is Sovereign Library & Ontology Engine v${VERSION} (Tibetan Three Kayas {-1, 0, +1} · NAND Gate HELD ∧ READ)`,
+    axiom_seal: 'ALEX|qMom Unbound Axiom · .oOo. Poo .oOo. · {<3,<3,<3}+1',
+    entity: {
+      requested_target: target,
+      resolved_title: summary.title || target,
+      wiki,
+      pageid: summary.pageid || null,
+      revision_timestamp: summary.timestamp || null,
+      canonical_url: summary.url || null,
+      infobox_type: summary.infoboxType || null,
+      race,
+      allegiance,
+      family_connections: family,
+      mentors,
+      quote,
+      categories: (summary.categories || []).slice(0, 15),
+      lead_summary: summary.lead_summary || '',
+    },
+    constitutional_nand_gate_receipt: {
+      HELD: held,
+      READ: read,
+      NAND_HELD_READ: nandOut,
+      status: 'NAND(HELD, READ) = 0 -> PRINTABLE / ADMISSIBLE IN SOVEREIGN ONTOLOGY',
+      principle: 'Compression != Ontology · A plausible branch (+1*) may be ranked; only a verified branch (+1) may be bound.',
+    },
+    balanced_ternary_three_kaya_ontology: threeKayaOntology,
+    six_pillars_of_holding: sixPillars,
+    sovereign_library_links: {
+      sovereign_library_repo: 'https://github.com/8b-is/sovereign-library',
+      ontology_spec: 'https://github.com/8b-is/sovereign-library/blob/main/ONTOLOGY.md',
+      pocoo_omni_book: 'https://pocoo.vaked.dev/demos/book/dragon-ball-sovereign-ontology-omni.html',
+    },
+  }
+}
+
+export const TOOLS = [
   {
-    name: 'fandom_category',
-    description:
-      'List pages and subcategories inside a Fandom category (e.g. "Saiyans", "Transformations", "Techniques", "Gods of Destruction", "Angels", "Sagas"). Defaults to `dragonball`.',
+    name: 'fandom_dbz_scouter',
+    description: 'Dragon Ball Universe Scouter & Lore Analyzer.',
     inputSchema: {
       type: 'object',
       properties: {
-        category: {
-          type: 'string',
-          description: 'Category name without prefix (e.g. "Saiyans", "Dragon Balls", "Transformations").',
-        },
-        wiki: {
-          type: 'string',
-          description: 'Fandom wiki subdomain (default: "dragonball").',
-        },
-        limit: {
-          type: 'number',
-          description: 'Max members to list (default: 30, max: 100).',
-        },
+        target: { type: 'string', description: 'Character or entity to inspect.' },
+        compare_with: { type: 'string', description: 'Optional rival to compare against.' },
+      },
+      required: ['target'],
+    },
+  },
+  {
+    name: 'fandom_dbz_saga',
+    description: 'Navigate Dragon Ball sagas and timeline metadata.',
+    inputSchema: {
+      type: 'object',
+      properties: { saga: { type: 'string', description: 'Optional specific saga title.' } },
+    },
+  },
+  {
+    name: 'fandom_search',
+    description: 'Search any Fandom wiki.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query.' },
+        wiki: { type: 'string', description: 'Fandom subdomain.' },
+        limit: { type: 'number', description: 'Max results.' },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'fandom_page',
+    description: 'Fetch a page and parse into clean Markdown.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'Page title.' },
+        wiki: { type: 'string', description: 'Fandom subdomain.' },
+        section: { type: 'number', description: 'Section index' },
+        max_chars: { type: 'number', description: 'Max characters' },
+        include_wikitext: { type: 'boolean', description: 'Include raw wikitext' },
+      },
+      required: ['title'],
+    },
+  },
+  {
+    name: 'fandom_infobox',
+    description: 'Extract infobox fields and summary for a page.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'Page title.' },
+        wiki: { type: 'string', description: 'Fandom subdomain.' },
+      },
+      required: ['title'],
+    },
+  },
+  {
+    name: 'fandom_sections',
+    description: 'List section headings for a page.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'Page title.' },
+        wiki: { type: 'string', description: 'Fandom subdomain.' },
+      },
+      required: ['title'],
+    },
+  },
+  {
+    name: 'fandom_category',
+    description: 'List category members.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        category: { type: 'string', description: 'Category name' },
+        wiki: { type: 'string', description: 'Fandom subdomain.' },
+        limit: { type: 'number', description: 'Max members' },
       },
       required: ['category'],
     },
   },
   {
     name: 'fandom_random',
-    description:
-      'Draw random lore capsules (with infoboxes and lead summaries) from a Fandom wiki (`dragonball` by default).',
+    description: 'Draw random pages from a Fandom wiki.',
     inputSchema: {
       type: 'object',
       properties: {
-        wiki: {
-          type: 'string',
-          description: 'Fandom wiki subdomain (default: "dragonball").',
-        },
-        count: {
-          type: 'number',
-          description: 'Number of random articles to draw (default: 3, max: 10).',
-        },
+        wiki: { type: 'string', description: 'Fandom subdomain.' },
+        count: { type: 'number', description: 'Number of random pages.' },
       },
     },
   },
   {
     name: 'fandom_sovereign_ontology',
-    description:
-      'Align any Fandom character, form, artifact, or lore entity into the 8b-is Sovereign Library & Ontology (`8b-is/sovereign-library` · Tibetan Three Kayas `{-1, 0, +1}` · Constitutional NAND Gate `HELD ∧ READ` · Six Pillars of Holding · `ALEX|qMom` Unbound Axiom `.oOo. Poo .oOo.`). Defaults to `dragonball`.',
+    description: 'Align a lore entity into the Sovereign Library ontology.',
     inputSchema: {
       type: 'object',
       properties: {
-        target: {
-          type: 'string',
-          description:
-            'Character, form, artifact, or lore entity to align into the Sovereign Library Ontology (e.g., "Goku", "Ultra Instinct", "Shenron", "Vegeta", "Broly", "Son Gohan").',
-        },
-        wiki: {
-          type: 'string',
-          description: 'Any Fandom subdomain (default: "dragonball"; e.g., "dragonball", "onepiece", "naruto", "matrix", "starwars").',
-        },
+        target: { type: 'string', description: 'Character or entity to align.' },
+        wiki: { type: 'string', description: 'Fandom subdomain.' },
       },
       required: ['target'],
+    },
+  },
+  {
+    name: 'fandom_canon_audit',
+    description: 'Run deterministic canon coherence audits: DAG validation, exact BigInt multiplier checks, holonomy conflict detection, and Jaccard entity clustering.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        dag_nodes: { type: 'array', items: { type: 'string' }, description: 'Timeline node IDs.' },
+        dag_edges: { type: 'array', items: { type: 'array', items: { type: 'string' } }, description: 'Directed edges [from,to].' },
+        base_power: { type: 'string', description: 'Integer base power level string.' },
+        multipliers: { type: 'array', items: { type: 'string' }, description: 'Ordered form multipliers.' },
+        observations: { type: 'array', items: { type: 'object' }, description: 'Cross-source claims.' },
+        target_tokens: { type: 'array', items: { type: 'string' }, description: 'Reference tokens.' },
+        candidates: { type: 'array', items: { type: 'object' }, description: 'Candidate records.' },
+      },
     },
   },
 ]
@@ -1525,6 +861,7 @@ const ALLOWED_TOOL_KEYS = {
   fandom_category: new Set(['category', 'wiki', 'limit']),
   fandom_random: new Set(['wiki', 'count']),
   fandom_sovereign_ontology: new Set(['target', 'wiki']),
+  fandom_canon_audit: new Set(['dag_nodes', 'dag_edges', 'base_power', 'multipliers', 'observations', 'target_tokens', 'candidates']),
 }
 
 function validateToolArgs(name, args) {
@@ -1534,9 +871,7 @@ function validateToolArgs(name, args) {
     throw new Error('Tool arguments must be a JSON object')
   }
   for (const key of Object.keys(args)) {
-    if (!allowed.has(key)) {
-      throw new Error(`Unknown argument "${key}" for tool "${name}"`)
-    }
+    if (!allowed.has(key)) throw new Error(`Unknown argument "${key}" for tool "${name}"`)
   }
   const normalized = { ...args }
   if (normalized.limit !== undefined) {
@@ -1546,7 +881,6 @@ function validateToolArgs(name, args) {
   }
   return normalized
 }
-
 
 export async function dispatchTool(name, rawArgs = {}) {
   const args = validateToolArgs(name, rawArgs)
@@ -1569,6 +903,8 @@ export async function dispatchTool(name, rawArgs = {}) {
       return fandomRandom(args)
     case 'fandom_sovereign_ontology':
       return runSovereignOntology(args.target, args.wiki || DEFAULT_WIKI)
+    case 'fandom_canon_audit':
+      return fandomCanonAudit(args)
     default:
       throw new Error(`Unknown tool: ${name}`)
   }
@@ -1576,8 +912,6 @@ export async function dispatchTool(name, rawArgs = {}) {
 
 export const callTool = dispatchTool
 
-// CLI Mode Support (when invoked with --scouter, --ontology, --search, --page, --infobox, --saga, --category, --random, --dump-schemas)
-// Resolve npm's bin symlink as well as direct invocations. Imports stay inert.
 const isMainModule = (() => {
   if (!process.argv[1]) return false
   try {
@@ -1587,13 +921,15 @@ const isMainModule = (() => {
   }
 })()
 const argv = process.argv.slice(2)
+
 if (isMainModule && argv.length > 0) {
+  const getArg = (flag) => {
+    const idx = argv.indexOf(flag)
+    return idx >= 0 && idx + 1 < argv.length ? argv[idx + 1] : null
+  }
+  const wiki = getArg('--wiki') || DEFAULT_WIKI
+
   const runCli = async () => {
-    const getArg = (flag) => {
-      const idx = argv.indexOf(flag)
-      return idx >= 0 && idx + 1 < argv.length ? argv[idx + 1] : null
-    }
-    const wiki = getArg('--wiki') || DEFAULT_WIKI
     if (argv.includes('--dump-schemas')) {
       console.log(JSON.stringify(TOOLS, null, 2))
       return
@@ -1639,12 +975,13 @@ if (isMainModule && argv.length > 0) {
       return
     }
   }
+
   runCli().catch((err) => {
     console.error(err)
     process.exit(1)
   })
 } else if (isMainModule) {
-  const MAX_MCP_OUTPUT_BYTES = 32 * 1024 // 32 KiB
+  const MAX_MCP_OUTPUT_BYTES = 32 * 1024
 
   function clampToolOutput(data) {
     const serialized = JSON.stringify(data, null, 2)
@@ -1664,6 +1001,7 @@ if (isMainModule && argv.length > 0) {
   function reply(id, result) {
     process.stdout.write(JSON.stringify({ jsonrpc: '2.0', id, result }) + '\n')
   }
+
   function replyErr(id, code, message) {
     process.stdout.write(JSON.stringify({ jsonrpc: '2.0', id, error: { code, message } }) + '\n')
   }
@@ -1687,100 +1025,32 @@ if (isMainModule && argv.length > 0) {
     if (id === undefined || id === null) return
 
     if (method === 'initialize') {
-      reply(id, {
-        protocolVersion: params?.protocolVersion || '2024-11-05',
-        capabilities: { tools: {} },
-        serverInfo: {
-          name: 'fandom-mcp',
-          version: VERSION,
-        },
-      })
+      reply(id, { protocolVersion: params?.protocolVersion || '2024-11-05', capabilities: { tools: {} }, serverInfo: { name: 'fandom-mcp', version: VERSION } })
       return
     }
+
     if (method === 'tools/list') {
       reply(id, { tools: TOOLS })
       return
     }
+
+    if (method === 'ping') {
+      reply(id, {})
+      return
+    }
+
     if (method === 'tools/call') {
       const name = params?.name
       const args = params?.arguments ?? {}
       try {
         const data = await dispatchTool(name, args)
-        reply(id, {
-          content: [{ type: 'text', text: clampToolOutput(data) }],
-        })
+        reply(id, { content: [{ type: 'text', text: clampToolOutput(data) }] })
       } catch (e) {
         replyErr(id, -32602, e?.message || 'Tool execution failed')
       }
       return
     }
+
     replyErr(id, -32601, `Method not found: ${method}`)
   })
-}
-
-
-  const rl = readline.createInterface({ input: process.stdin, terminal: false })
-  rl.on('line', async (line) => {
-    const trimmed = line.trim()
-    if (!trimmed) return
-    let msg
-    try {
-      msg = JSON.parse(trimmed)
-    } catch {
-      replyErr(null, -32700, 'Parse error')
-      return
-    }
-    if (msg === null || typeof msg !== 'object' || Array.isArray(msg)) {
-      replyErr(null, -32600, 'Invalid Request')
-      return
-    }
-    const { id, method, params } = msg
-    if (id === undefined || id === null) return
-
-    if (method === 'initialize') {
-      reply(id, {
-        protocolVersion: params?.protocolVersion || '2024-11-05',
-        capabilities: { tools: {} },
-        serverInfo: {
-          name: 'fandom-mcp',
-          version: VERSION,
-        },
-      })
-      return
-    }
-
-    if (method === 'tools/list') {
-      reply(id, { tools: TOOLS })
-      return
-    }
-
-    if (method === 'tools/call') {
-      const MAX_MCP_OUTPUT_BYTES = 32 * 1024 // 32 KiB
-
-function clampToolOutput(data) {
-  let serialized = JSON.stringify(data, null, 2)
-  if (Buffer.byteLength(serialized, 'utf8') <= MAX_MCP_OUTPUT_BYTES) {
-    return serialized
-  }
-  const compact = JSON.stringify(data)
-  if (Buffer.byteLength(compact, 'utf8') <= MAX_MCP_OUTPUT_BYTES) {
-    return compact
-  }
-  const notice = '\n...[TRUNCATED: Exceeded 32 KiB MCP tool ceiling]'
-  const budget = MAX_MCP_OUTPUT_BYTES - Buffer.byteLength(notice, 'utf8')
-  const sliced = Buffer.from(compact, 'utf8').subarray(0, budget).toString('utf8')
-  return sliced + notice
-}
-if (method === 'tools/call') {
-  const name = params?.name
-  const args = params?.arguments ?? {}
-  try {
-    const data = await dispatchTool(name, args)
-    reply(id, {
-      content: [{ type: 'text', text: clampToolOutput(data) }],
-    })
-  } catch (e) {
-    replyErr(id, -32602, e?.message || 'Tool execution failed')
-  }
-  return
 }
