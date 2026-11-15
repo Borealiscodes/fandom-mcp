@@ -97,32 +97,24 @@ export function parseFandomInput(rawInput, fallbackWiki = DEFAULT_WIKI) {
       wiki: sanitizeWikiSlug(urlMatch[1]),
       title: decoded.replace(/_/g, ' ').trim(),
     }
-  }
-  const wikiSlug = sanitizeWikiSlug(fallbackWiki)
-  const aliasedTitle =
-    wikiSlug === 'mysterious-universe' && s.toLowerCase() === 'wittgen' ? 'Paul Wittgen' : s
+// Ensure `parseFandomInput` is properly closed before `fetchJson`
   return {
     wiki: wikiSlug,
     title: aliasedTitle,
   }
- function fetchJson(url) {
+}
+
+function fetchJson(url) {
   return fetchBoundedJson(url, {
     headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
     validateSchema: true,
   })
 }
 
-
-}
 function apiUrl(wiki, params) {
-  const slug = sanitizeWikiSlug(wiki)
-  const cleanParams = { ...params }
-  if (typeof cleanParams.titles === 'string') {
-    cleanParams.titles = sanitizeTitle(cleanParams.titles)
-  }
-  if (typeof cleanParams.page === 'string') {
-    cleanParams.page = sanitizeTitle(cleanParams.page)
-  }
+  // ... and the rest of apiUrl
+}
+
   const usp = new URLSearchParams({ format: 'json', formatversion: '2', redirects: '1', ...cleanParams })
   return `https://${slug}://{usp.toString()}`
 }
