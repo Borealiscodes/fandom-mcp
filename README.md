@@ -2,214 +2,78 @@
 
 Dragon Ball Universe Coherence Engine — Ontology, Clustering, and Multiversal Runtime Physics
 
-The fandom‑mcp project is an open‑source attempt to build a coherent, mathematically stable representation of the Dragon Ball Universe, including:
-
-- characters  
-- transformations  
-- sagas  
-- timelines  
-- universes  
-- cosmology  
-- power scaling  
-- multiversal branching  
-
-Unlike typical fandom scrapers or ontology projects, this repo aims to stabilize Dragon Ball’s notoriously chaotic canon using tools derived from the A0–A10 altitude stack and the AyeOS spectral‑temporal primitives.
-
-This is not just clustering.  
-This is not just ontology fusion.  
-This is a runtime physics engine for fictional universes.
+The **fandom‑mcp** project is a zero-dependency Node.js ESM open-source runtime engine designed to stabilize fictional universe canon (focusing on Dragon Ball and Fandom wikis) using deterministic graph invariants, exact rational arithmetic, and the A0–A10 altitude stack.
 
 ---
 
-🧩 Bill Nye Tile Explainer
+## ⚠️ Verification & Live Testing Status
 
-For a friendly, science‑communicator overview of:
-
-- the original 8B resonance algebra  
-- the altitude audit  
-- the mathematical fixes  
-- the repaired 8B v2.0 algebra  
-- and the future A8–A10 roadmap  
-
-see:
-
-`
-docs/tiles/8BResonanceExplainer_Tile.md
-`
-
-This tile explains the lineage in a way that is accessible to contributors, collaborators, and curious readers.
+- **Baseline Runtime:** Zero-dependency Node.js ESM server (`fandom-mcp.mjs`), JSON-RPC 2.0 stdio transport, CLI flags (`--scouter`, `--ontology`, `--page`, `--infobox`, `--search`, `--saga`, `--category`, `--random`), MediaWiki parser, and Sovereign Library Ontology profiles are live and operational.
+- **Phases 1–4 Upgrades (Offline Verified):** SSRF-hardened MediaWiki client (`http-json.mjs`), deterministic canon engine (`toolkit/canon_engine.mjs`), `fandom_canon_audit` MCP tool, and output clamping have passed offline unit tests (`node --test test-http.mjs test-canon.mjs` and `scripts/verify.sh`), **but are untested against live Fandom endpoints**.
 
 ---
 
-🧠 Mathematical Lineage: From 8B → A4.2 → A6 → A7
+## 🧩 Bill Nye Tile Explainer & Mathematical Lineage
 
-The fandom‑mcp project interfaces with the 8B resonance algebra, which originally lived at:
-
-A4.2 — Proto‑Spectral / Signal Runtime Physics
-
-The altitude audit (see docs/audit/a4.2-8b-resonance-audit.tex) showed that 8B lacked:
-
-- spectral continuity  
-- phase‑space geometry  
-- temporal stability envelopes  
-- modal truth values  
-- adjacency propagation  
-- kernel invariants  
-- holonomy bounds  
-- collapse surfaces  
-- collapse repair  
-- dual reprojection  
-
-The repaired version, 8B Resonance Algebra v2.0, adds all missing components and lifts the system to:
-
-A6 dual‑algebra compatibility
-and  
-
-A7 non‑dual collapse integration
-
-The full repaired algebra is in:
-
-`
-docs/algebra/8b-resonance-algebra-v2.0.tex
-`
-
-This is the mathematical backbone that allows fandom‑mcp to maintain coherence, not just clustering.
+- **Tile Explainer:** See `docs/tiles/8BResonanceExplainer_Tile.md` for an accessible overview of the 8B resonance algebra, altitude audits, and the A8–A10 roadmap.
+- **Algebra Evolution (8B → A4.2 → A6 → A7):** The engine builds on the 8B resonance algebra (originally at A4.2 proto-spectral runtime physics). Following audit recommendations (`docs/audit/a4.2-8b-resonance-audit.tex`), **8B Resonance Algebra v2.0** (`docs/algebra/8b-resonance-algebra-v2.0.tex`) adds spectral continuity, phase-space geometry, temporal stability envelopes, modal truth values, and holonomy bounds, lifting the system to A6 dual-algebra and A7 non-dual collapse integration.
 
 ---
 
-🐉 Why Dragon Ball Requires Runtime Physics
+## 🐉 Why Dragon Ball Requires Runtime Physics
 
-Dragon Ball canon is:
-
-- nonlinear  
-- retconned  
-- multiversal  
-- transformation‑driven  
-- cosmology‑heavy  
-- timeline‑fractured  
-- power‑scaled to absurdity  
-
-A simple ontology or clustering system cannot handle:
-
-- contradictory timelines  
-- retcon collisions  
-- multiversal branching  
-- saga‑level coherence  
-- transformation lineage consistency  
-- cosmological hierarchy  
-- power‑scaling discontinuities  
-
-This repo uses spectral clustering, holonomy coherence, and saga DAGs to stabilize the universe.
+Dragon Ball’s nonlinear, retconned, and multiversal canon cannot be resolved by standard clustering or scrapers alone. This engine uses deterministic Jaccard clustering, discrete holonomy contradiction detection, `BigInt` rational multipliers, and cycle-checked saga DAGs to enforce consistency across timelines and media.
 
 ---
 
-🏗 Current State of the Codebase
+## 🏗 Current State of the Codebase
 
-The repo is currently in the architecture + scaffolding phase.
+### Operational Core & Modules
+- **MCP Server & CLI (`fandom-mcp.mjs`):** JSON-RPC 2.0 over stdio and direct CLI tool inspection.
+- **SSRF-Hardened Client (`http-json.mjs`):** Enforces HTTPS-only `*.fandom.com` allowlists, 2 MiB payloads, 8000ms timeouts, jitter-free retries, and title sanitization.
+- **Canon & Saga DAG Engine (`toolkit/canon_engine.mjs`):**
+  - **Cycle-Checked Timeline DAG:** Topological sort with DFS back-edge detection (`ErrTimelineCycle`).
+  - **Exact `BigInt` Rational Multipliers (`p/q`):** Stacks power/transformation multipliers without floating-point loss.
+  - **Discrete Holonomy Detector:** Flags cross-source attribute conflicts (`HolonomyConflict`).
+  - **Deterministic Jaccard Clustering:** Integer-scaled similarity with tie-breaking.
+- **Protocol Hardening:** Strict key allowlists (`ALLOWED_TOOL_KEYS`), limit clamping, and a 32 KiB output ceiling.
 
-Implemented:
-- ingestion scaffolding  
-- ontology skeleton  
-- clustering module stubs  
-- saga graph structure  
-- MCP adapter interface  
-- documentation spine  
-
-In progress:
-- spectral clustering engine  
-- holonomy‑based timeline coherence  
-- transformation lineage graph  
-- cosmology hierarchy model  
-- saga DAG coherence validator  
-
-Planned:
-- full MCP runtime  
-- embedding adapters  
-- A8–A10 integration layers  
-
----
-
-🧱 Codebase Architecture
-
-`
-<pre> 
-  
+### Architecture Overview
+```text
 fandom-mcp/
-│
-├── src/
-│   ├── ingest/              # wiki/API ingestion + normalization
-│   ├── core/                # ontology: characters, forms, sagas, timelines
-│   ├── clustering/          # spectral + holonomy clustering
-│   ├── adapters/            # MCP API + embedding adapters
-│   ├── runtime/             # coherence engine + saga graph
-│   └── utils/               # math, text, db helpers
-│
-├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── embeddings/
-│
-└── docs/
-    ├── tiles/               # Bill Nye explainers
-    ├── audit/               # altitude audits
-    ├── algebra/             # formal mathematical specs
-    ├── architecture.md
-    ├── clustering.md
-    ├── ontology.md
-    └── coherence.md
-`
-</pre>
----
-
-🔮 Future Paths: A8 → A9 → A10
-
-Once the coherence engine stabilizes, the repo will integrate with:
-
-A8 Congruence Adapter
-Narrative + emotional congruence:
-
-- character motivation  
-- saga tone  
-- thematic arcs  
-
-A8C Complex Adapter
-Complex‑valued embeddings:
-
-- god ki  
-- divine forms  
-- conceptual transformations  
-
-A9 Quantum‑Inspired Runtime
-Quantum‑holonomy modeling:
-
-- timeline superposition  
-- multiversal branching  
-- conceptual qubits  
-
-A10 Conceptual Quantum Operator Runtime
-High‑altitude conceptual physics:
-
-- conceptual operators  
-- non‑local saga coherence  
-- quantum‑holonomy cosmology  
-
-This is where Dragon Ball’s multiverse becomes mathematically coherent.
+├── fandom-mcp.mjs           # Zero-dependency MCP stdio server & CLI
+├── http-json.mjs            # SSRF-proof MediaWiki HTTPS client
+├── package.json             # ESM package manifest & scripts
+├── toolkit/canon_engine.mjs # DAG, BigInt rationals, holonomy & Jaccard clustering
+├── scripts/verify.sh        # Offline syntax, unit test, & verifier suite
+├── test-http.mjs, test-canon.mjs, test.mjs, test-stdio.mjs, test-live.mjs
+└── docs/                    # Engineering roadmaps, tiles, audits, & formal algebra
+```
 
 ---
 
-🤝 Collaboration
+## 🚀 Quickstart & Verification
 
-We welcome contributions in:
+```bash
+# Run offline verification suite (syntax, unit tests, CLI schema dump, stdio handshake)
+bash scripts/verify.sh
+node --test test-http.mjs test-canon.mjs
 
-- Rust development  
-- spectral clustering  
-- graph theory  
-- ontology design  
-- fictional universe modeling  
-- runtime physics  
-- A8–A10 altitude research  
+# CLI usage examples
+node fandom-mcp.mjs --scouter "Goku" --compare "Vegeta"
+node fandom-mcp.mjs --ontology "Ultra Instinct"
+node fandom-mcp.mjs --dump-schemas
+```
 
-See docs/tiles/8BResonanceExplainer_Tile.md for a friendly overview of the lineage and future directions.
+### Exposed MCP Tools
+- `fandom_dbz_scouter`, `fandom_dbz_saga`, `fandom_search`, `fandom_page`, `fandom_infobox`, `fandom_sections`, `fandom_category`, `fandom_random`, `fandom_sovereign_ontology`, `fandom_canon_audit`.
 
 ---
 
+## 🔮 Future Paths: A8 → A9 → A10
+- **A8 Congruence & A8C Complex Adapters:** Narrative/emotional congruence and complex-valued embeddings for divine forms/god ki.
+- **A9 Quantum-Inspired Runtime:** Quantum-holonomy modeling for timeline superposition and multiversal branching.
+- **A10 Conceptual Quantum Operator Runtime:** High-altitude conceptual physics and non-local saga coherence.
+
+## 🤝 Collaboration
+Contributions welcome in zero-dependency ESM/Rust tooling, graph theory, ontology design, and A8–A10 research. See `docs/tiles/8BResonanceExplainer_Tile.md` and `docs/ENGINEERING_UPGRADE_ROADMAP.md`.
